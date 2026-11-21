@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { hasPermission } from "@/lib/permissions";
-import { UserRole } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -12,23 +10,20 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "20");
+  const limit = parseInt(searchParams.get("limit") || "50");
   const search = searchParams.get("search") || "";
-  const status = searchParams.get("status") || "";
-  const isCurrent = searchParams.get("isCurrent");
 
   const where: Record<string, unknown> = {
     isArchived: false,
     ...(search && {
       OR: [
-        { nameEn: { contains: search, mode: "insensitive" } },
+        { nameEn: { contains: search } },
         { nameBn: { contains: search } },
-        { designationEn: { contains: search, mode: "insensitive" } },
-        { subjectEn: { contains: search, mode: "insensitive" } },
+        { designationEn: { contains: search } },
+        { designationBn: { contains: search } },
+        { subjectEn: { contains: search } },
       ],
     }),
-    ...(status && { status }),
-    ...(isCurrent !== null && { isCurrent: isCurrent === "true" }),
   };
 
   const [teachers, total] = await Promise.all([
@@ -52,30 +47,44 @@ export async function POST(request: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const userRole = (session.user as { role?: UserRole })?.role;
-  if (!userRole || !hasPermission(userRole, "MANAGE_TEACHERS")) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
 
   try {
     const body = await request.json();
+    const {
+      nameEn,
+      nameBn,
+      designationEn,
+      designationBn,
+      subjectEn,
+      subjectBn,
+      photoUrl,
+      qualificationsBn,
+      qualificationsEn,
+      displayOrder,
+      isPublished,
+      status,
+    } = body;
+
+    if (!nameEn) {
+      return NextResponse.json({ error: "শিক্ষকের নাম (ইংরেজি) আবশ্যক" }, { status: 400 });
+    }
+
     const teacher = await prisma.teacher.create({
       data: {
-        ...body,
-        createdById: session.user.id,
-        status: "PENDING_VERIFICATION",
-        isPublished: false,
-      },
-    });
-
-    // Audit log
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: "CREATE_TEACHER",
-        entity: "Teacher",
-        entityId: teacher.id,
-        details: `Created teacher: ${teacher.nameEn}`,
+        nameEn,
+        nameBn: nameBn || nameEn,
+        designationEn: designationEn || null,
+        designationBn: designationBn || null,
+        subjectEn: subjectEn || null,
+        subjectBn: subjectBn || null,
+        photoUrl: photoUrl || null,
+        qualificationsBn: qualificationsBn || null,
+        qualificationsEn: qualificationsEn || qualificationsBn || null,
+        displayOrder: Number(displayOrder) || 0,
+        isPublished: isPublished !== undefined ? Boolean(isPublished) : true,
+        status: status || "PUBLISHED",
+        verificationStatus: "VERIFIED",
+        isCurrent: true,
       },
     });
 

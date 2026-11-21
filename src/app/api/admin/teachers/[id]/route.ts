@@ -31,9 +31,33 @@ export async function PATCH(
 
   try {
     const body = await request.json();
+    const allowedFields = [
+      "nameEn",
+      "nameBn",
+      "designationEn",
+      "designationBn",
+      "subjectEn",
+      "subjectBn",
+      "photoUrl",
+      "qualificationsEn",
+      "qualificationsBn",
+      "displayOrder",
+      "isPublished",
+      "isCurrent",
+      "status",
+      "verificationStatus",
+    ];
+
+    const updateData: Record<string, unknown> = {};
+    for (const key of allowedFields) {
+      if (key in body) {
+        updateData[key] = body[key];
+      }
+    }
+
     const updated = await prisma.teacher.update({
       where: { id },
-      data: body,
+      data: updateData,
     });
     return NextResponse.json(updated);
   } catch (error) {

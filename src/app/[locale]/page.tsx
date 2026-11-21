@@ -260,10 +260,10 @@ export default async function HomePage({
                       <Calendar size={12} className="text-[#c9a84c]" />
                       {ev.eventDate
                         ? new Date(ev.eventDate).toLocaleDateString(locale === "bn" ? "bn-BD" : "en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
                         : "তারিখ নির্ধারিত নয়"}
                     </span>
                     <h3 className="font-bold text-gray-900 text-sm line-clamp-2 group-hover:text-[#1e3a5f] transition-colors">
