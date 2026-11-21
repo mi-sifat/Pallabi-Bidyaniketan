@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { randomUUID } from "crypto";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getAdminSession } from "@/lib/auth-guard";
 
 const MAX_SIZE = parseInt(process.env.MAX_FILE_SIZE_MB || "10") * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -12,8 +12,8 @@ const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_DOC_TYPES];
 
 export async function POST(request: NextRequest) {
   // Auth check
-  const session = await auth();
-  if (!session?.user) {
+  const sessionUser = await getAdminSession(request);
+  if (!sessionUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         size: file.size,
         url: publicUrl,
         folder,
-        uploadedById: session.user.id,
+        uploadedById: sessionUser.id,
       },
     });
 

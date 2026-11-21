@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import { join } from "path";
 import { randomUUID } from "crypto";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getAdminSession } from "@/lib/auth-guard";
 
 const MAX_SIZE = parseInt(process.env.MAX_FILE_SIZE_MB || "10") * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/svg+xml"];
@@ -41,8 +41,8 @@ async function checkMediaUsage(url: string) {
 }
 
 export async function GET(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const sessionUser = await getAdminSession(request);
+  if (!sessionUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -84,8 +84,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const sessionUser = await getAdminSession(request);
+  if (!sessionUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
         category,
         caption: caption || file.name,
         altText: altText || file.name,
-        uploadedById: session.user.id,
+        uploadedById: sessionUser.id,
         isPublished: true,
       },
     });
@@ -154,8 +154,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const sessionUser = await getAdminSession(request);
+  if (!sessionUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -183,8 +183,8 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const sessionUser = await getAdminSession(request);
+  if (!sessionUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -173,18 +173,24 @@ export default async function HomePage({
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-full bg-amber-50 text-[#1e3a5f] font-black text-lg flex items-center justify-center border-2 border-amber-200 shrink-0">
-                শ.আ
+              <div className="w-16 h-16 rounded-full bg-amber-50 overflow-hidden border-2 border-[#1e3a5f]/30 shrink-0 shadow-xs relative">
+                <Image
+                  src="/uploads/teachers/MD_SHAHE_ALAM.jpg"
+                  alt={locale === "bn" ? "মোঃ শাহে আলম" : "MD. SHAHE ALAM"}
+                  fill
+                  sizes="64px"
+                  className="object-cover"
+                />
               </div>
               <div>
                 <h4 className="font-bold text-gray-900 text-sm">
                   {locale === "bn" ? "মোঃ শাহে আলম" : "MD. SHAHE ALAM"}
                 </h4>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 font-medium">
                   {locale === "bn" ? "প্রধান শিক্ষক" : "Headmaster"}
                 </p>
-                <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-medium inline-block mt-0.5">
-                  {locale === "bn" ? "যাচাই প্রক্রিয়াধীন" : "Verification Pending"}
+                <span className="text-[10px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full font-bold inline-block mt-0.5 border border-emerald-200">
+                  {locale === "bn" ? "পল্লবী বিদ্যানিকেতন" : "Pallabi Bidyaniketan"}
                 </span>
               </div>
             </div>
@@ -196,8 +202,8 @@ export default async function HomePage({
             </p>
 
             <Link
-              href={`/${locale}/about`}
-              className="text-xs font-semibold text-[#1e3a5f] hover:underline inline-block pt-1"
+              href={`/${locale}/headmaster-message`}
+              className="text-xs font-bold text-[#1e3a5f] hover:text-[#c9a84c] inline-block pt-1 transition-colors"
             >
               {locale === "bn" ? "বাণী সম্পূর্ণ পড়ুন" : "Read Full Message"} &rarr;
             </Link>

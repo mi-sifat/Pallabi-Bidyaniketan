@@ -26,6 +26,8 @@ export default function HomepageSlider({
   locale?: Locale;
 }) {
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [prevIdx, setPrevIdx] = useState<number | null>(null);
+  const [direction, setDirection] = useState<"next" | "prev">("next");
   const [isPlaying, setIsPlaying] = useState(true);
   const touchStartX = useRef<number | null>(null);
 
@@ -49,13 +51,21 @@ export default function HomepageSlider({
           },
         ];
 
+  const goToSlide = useCallback((nextIndex: number, dir: "next" | "prev") => {
+    setDirection(dir);
+    setPrevIdx(currentIdx);
+    setCurrentIdx(nextIndex);
+  }, [currentIdx]);
+
   const nextSlide = useCallback(() => {
-    setCurrentIdx((prev) => (prev + 1) % effectiveSlides.length);
-  }, [effectiveSlides.length]);
+    const nextIndex = (currentIdx + 1) % effectiveSlides.length;
+    goToSlide(nextIndex, "next");
+  }, [currentIdx, effectiveSlides.length, goToSlide]);
 
   const prevSlide = useCallback(() => {
-    setCurrentIdx((prev) => (prev === 0 ? effectiveSlides.length - 1 : prev - 1));
-  }, [effectiveSlides.length]);
+    const nextIndex = currentIdx === 0 ? effectiveSlides.length - 1 : currentIdx - 1;
+    goToSlide(nextIndex, "prev");
+  }, [currentIdx, effectiveSlides.length, goToSlide]);
 
   // Autoplay timer
   useEffect(() => {
@@ -87,105 +97,120 @@ export default function HomepageSlider({
       onTouchEnd={handleTouchEnd}
       className="relative w-full h-[420px] sm:h-[480px] md:h-[540px] lg:h-[580px] overflow-hidden bg-slate-950 group select-none"
     >
-      {/* Sliding Track — all slides in a flex row, one slide = 100vw */}
-      <div
-        className="absolute top-0 left-0 h-full flex transition-transform duration-700 ease-in-out"
-        style={{
-          width: `${effectiveSlides.length * 100}vw`,
-          transform: `translateX(-${currentIdx * (100 / effectiveSlides.length)}%)`,
-        }}
-      >
-      {effectiveSlides.map((slide, index) => {
-        const isCurrent = index === currentIdx;
-        const title =
-          locale === "bn"
-            ? slide.titleBn || slide.titleEn
-            : slide.titleEn || slide.titleBn;
-        const subtitle =
-          locale === "bn"
-            ? slide.subtitleBn || slide.subtitleEn
-            : slide.subtitleEn || slide.subtitleBn;
-        const buttonText =
-          locale === "bn"
-            ? slide.buttonTextBn || slide.buttonTextEn
-            : slide.buttonTextEn || slide.buttonTextBn;
+      {/* Slides Container - absolute positioning per slide for seamless infinite forward/backward transition */}
+      <div className="relative w-full h-full overflow-hidden">
+        {effectiveSlides.map((slide, index) => {
+          const isCurrent = index === currentIdx;
+          const isPrev = index === prevIdx;
+          const title =
+            locale === "bn"
+              ? slide.titleBn || slide.titleEn
+              : slide.titleEn || slide.titleBn;
+          const subtitle =
+            locale === "bn"
+              ? slide.subtitleBn || slide.subtitleEn
+              : slide.subtitleEn || slide.subtitleBn;
+          const buttonText =
+            locale === "bn"
+              ? slide.buttonTextBn || slide.buttonTextEn
+              : slide.buttonTextEn || slide.buttonTextBn;
 
-        return (
-          <div
-            key={slide.id}
-            aria-hidden={!isCurrent}
-            className="relative h-full"
-            style={{ width: "100vw" }}
-          >
-            {/* Background Image */}
-            <Image
-              src={slide.imageUrl}
-              alt={title || "School banner"}
-              fill
-              priority={index === 0}
-              sizes="100vw"
-              quality={85}
-              className={`object-cover transform transition-transform duration-[7000ms] ease-out ${
-                isCurrent ? "scale-105" : "scale-100"
-              }`}
-            />
+          // Determine slide positioning for smooth continuous motion
+          let transformClass = "translate-x-full opacity-0 pointer-events-none";
+          if (isCurrent) {
+            transformClass = "translate-x-0 opacity-100 z-10 pointer-events-auto";
+          } else if (isPrev) {
+            transformClass =
+              direction === "next"
+                ? "-translate-x-full opacity-0 z-0 pointer-events-none"
+                : "translate-x-full opacity-0 z-0 pointer-events-none";
+          } else {
+            transformClass =
+              direction === "next"
+                ? "translate-x-full opacity-0 pointer-events-none"
+                : "-translate-x-full opacity-0 pointer-events-none";
+          }
 
-            {/* Gradient Overlays for High-Contrast Text Legibility */}
+          return (
             <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.60) 50%, rgba(0,0,0,0.30) 100%)",
-              }}
-            />
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.20) 50%, rgba(0,0,0,0.40) 100%)",
-              }}
-            />
+              key={slide.id}
+              aria-hidden={!isCurrent}
+              className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out ${transformClass}`}
+            >
+              {/* Background Image */}
+              <Image
+                src={slide.imageUrl}
+                alt={title || "School banner"}
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                quality={85}
+                className="object-cover w-full h-full"
+              />
 
-            {/* Content Overlay */}
-            <div className="relative z-20 container mx-auto px-4 sm:px-6 h-full flex flex-col justify-center max-w-6xl">
-              <div className="max-w-2xl space-y-3 sm:space-y-4 text-left">
-                {/* Institutional Badge */}
-                <div className="inline-flex items-center gap-2 bg-[#c9a84c] text-[#1e3a5f] text-[10px] sm:text-xs font-black px-3.5 py-1 rounded-full shadow-md uppercase tracking-wider">
-                  <span>EIIN: ১০৮৩২৫</span>
-                  <span>•</span>
-                  <span>মিরপুর-৭, ঢাকা</span>
-                </div>
-
-                {/* Main Heading */}
-                <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight sm:leading-snug drop-shadow-md">
-                  {title}
-                </h1>
-
-                {/* Subtitle / Description */}
-                {subtitle && (
-                  <p className="text-xs sm:text-sm md:text-base text-gray-100 leading-relaxed max-w-xl drop-shadow line-clamp-2 sm:line-clamp-3">
-                    {subtitle}
-                  </p>
-                )}
-
-                {/* Call-to-action Button */}
-                {slide.buttonUrl && buttonText && (
-                  <div className="pt-2 sm:pt-4">
-                    <Link
-                      href={slide.buttonUrl}
-                      className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-[#c9a84c] hover:bg-amber-400 text-[#1e3a5f] font-extrabold text-xs sm:text-sm rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer"
-                    >
-                      <span>{buttonText}</span>
-                      <ArrowRight size={16} />
-                    </Link>
+              {/* Per-slide Content Overlay */}
+              <div className="relative z-20 container mx-auto px-4 sm:px-6 h-full flex flex-col justify-center max-w-6xl">
+                <div className="max-w-2xl space-y-3 sm:space-y-4 text-left">
+                  {/* Institutional Badge */}
+                  <div className="inline-flex items-center gap-2 bg-[#c9a84c] text-[#1e3a5f] text-[10px] sm:text-xs font-black px-3.5 py-1 rounded-full shadow-md uppercase tracking-wider">
+                    <span>EIIN: ১০৮৩২৫</span>
+                    <span>•</span>
+                    <span>মিরপুর-৭, ঢাকা</span>
                   </div>
-                )}
+
+                  {/* Main Heading */}
+                  <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight sm:leading-snug drop-shadow-md">
+                    {title}
+                  </h1>
+
+                  {/* Subtitle / Description */}
+                  {subtitle && (
+                    <p className="text-xs sm:text-sm md:text-base text-gray-100 leading-relaxed max-w-xl drop-shadow line-clamp-2 sm:line-clamp-3">
+                      {subtitle}
+                    </p>
+                  )}
+
+                  {/* Call-to-action Button */}
+                  {slide.buttonUrl && buttonText && (
+                    <div className="pt-2 sm:pt-4">
+                      <Link
+                        href={slide.buttonUrl}
+                        className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-[#c9a84c] hover:bg-amber-400 text-[#1e3a5f] font-extrabold text-xs sm:text-sm rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                      >
+                        <span>{buttonText}</span>
+                        <ArrowRight size={16} />
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })}
-      </div>{/* end sliding track */}
+          );
+        })}
+      </div>
+
+      {/* Container-level Persistent Shadow & Gradient Overlays — eliminates any side gaps or flicker */}
+      <div
+        className="absolute inset-0 pointer-events-none z-15"
+        style={{
+          background:
+            "linear-gradient(to right, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.65) 45%, rgba(15,23,42,0.20) 100%)",
+        }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none z-15"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 60%)",
+        }}
+      />
+      <div
+        className="absolute inset-x-0 top-0 h-24 pointer-events-none z-15"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)",
+        }}
+      />
 
       {/* Prev / Next Navigation Arrows */}
       {effectiveSlides.length > 1 && (
@@ -213,7 +238,7 @@ export default function HomepageSlider({
               <button
                 key={idx}
                 type="button"
-                onClick={() => setCurrentIdx(idx)}
+                onClick={() => goToSlide(idx, idx > currentIdx ? "next" : "prev")}
                 className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
                   idx === currentIdx
                     ? "w-7 sm:w-9 bg-[#c9a84c]"
