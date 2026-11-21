@@ -398,7 +398,6 @@ model News {
   createdBy    User?         @relation("NewsCreator", fields: [createdById], references: [id])
   album        GalleryAlbum? @relation("NewsAlbum", fields: [albumId], references: [id])
   event        SchoolEvent?  @relation("NewsEvent", fields: [eventId], references: [id])
-  fbImports    FacebookImport[]
 
   @@map("news")
 }
@@ -443,7 +442,6 @@ model SchoolEvent {
   albumId       String?
   album         GalleryAlbum? @relation("EventAlbum", fields: [albumId], references: [id])
   news          News[]        @relation("NewsEvent")
-  fbImports     FacebookImport[]
 
   @@map("school_events")
 }
@@ -475,7 +473,6 @@ model GalleryAlbum {
   images      GalleryImage[]
   news        News[]           @relation("NewsAlbum")
   events      SchoolEvent[]    @relation("EventAlbum")
-  fbImports   FacebookImport[]
 
   @@map("gallery_albums")
 }
@@ -768,34 +765,48 @@ model MigrationRecord {
 }
 
 // ─────────────────────────────────────────────
-// FACEBOOK PAGE CONTENT IMPORTS
+// HOMEPAGE SLIDES
 // ─────────────────────────────────────────────
 
-model FacebookImport {
-  id              String   @id @default(cuid())
-  fbPostId        String?  @unique
-  fbPostUrl       String?
-  caption         String?
-  postedAt        DateTime?
-  eventTitle      String?
-  eventCategory   String?  @default("Event") // Sports, Cultural, Academic, Celebration, Campus, Reunion
-  sourceType      String   @default("MANUAL_OR_PUBLIC") // GRAPH_API, PUBLIC_PAGE, MANUAL_EXPORT, ADMIN_UPLOAD
-  mediaUrls       String?  // JSON stringified array of stored media files
-  albumId         String?
-  newsId          String?
-  eventId         String?
-  status          ContentStatus @default(PENDING_APPROVAL)
-  verificationStatus VerificationStatus @default(PENDING_VERIFICATION)
-  isDuplicate     Boolean  @default(false)
-  adminNotes      String?
-  importedAt      DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+model HomepageSlide {
+  id           String   @id @default(cuid())
+  titleBn      String?
+  titleEn      String?
+  subtitleBn   String?
+  subtitleEn   String?
+  buttonTextBn String?
+  buttonTextEn String?
+  buttonUrl    String?
+  imageUrl     String
+  sortOrder    Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  album           GalleryAlbum? @relation(fields: [albumId], references: [id])
-  news            News?         @relation(fields: [newsId], references: [id])
-  event           SchoolEvent?  @relation(fields: [eventId], references: [id])
+  @@map("homepage_slides")
+}
 
-  @@map("facebook_imports")
+// ─────────────────────────────────────────────
+// ANNOUNCEMENT POPUP
+// ─────────────────────────────────────────────
+
+model AnnouncementPopup {
+  id            String    @id @default(cuid())
+  titleBn       String?
+  titleEn       String?
+  descriptionBn String?
+  descriptionEn String?
+  imageUrl      String?
+  buttonTextBn  String?
+  buttonTextEn  String?
+  buttonUrl     String?
+  startDate     DateTime?
+  endDate       DateTime?
+  isActive      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("announcement_popups")
 }
 
 // ─────────────────────────────────────────────

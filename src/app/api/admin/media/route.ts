@@ -1,0 +1,147 @@
+import { NextRequest, NextResponse } from "next/server";
+import { writeFile, mkdir, unlink } from "fs/promises";
+import { join } from "path";
+import { randomUUID } from "crypto";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+const MAX_SIZE = parseInt(process.env.MAX_FILE_SIZE_MB || "10") * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/svg+xml"];
+
+export async function GET(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const q = searchParams.get("q") || "";
+  const category = searchParams.get("category");
+  const limit = parseInt(searchParams.get("limit") || "60");
+
+  const where: Record<string, unknown> = {
+    ...(category && category !== "all" ? { category } : {}),
+    ...(q
+      ? {
+          OR: [
+            { originalName: { contains: q } },
+            { caption: { contains: q } },
+            { altText: { contains: q } },
+          ],
+        }
+      : {}),
+  };
+
+  try {
+    const media = await prisma.media.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+    return NextResponse.json({ success: true, media });
+  } catch (error) {
+    console.error("Fetch media error:", error);
+    return NextResponse.json({ error: "Failed to fetch media" }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const formData = await request.formData();
+    const file = formData.get("file") as File | null;
+    const category = (formData.get("category") as string) || "general";
+    const caption = (formData.get("caption") as string) || "";
+    const altText = (formData.get("altText") as string) || caption || "";
+    const folder = (formData.get("folder") as string) || "media";
+
+    if (!file) {
+      return NextResponse.json({ error: "কোনো ফাইল পাওয়া যায়নি" }, { status: 400 });
+    }
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        { error: "শুধুমাত্র ছবি আপলোড করতে পারবেন (JPG, PNG, WebP)" },
+        { status: 400 }
+      );
+    }
+
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json(
+        { error: `ফাইলের আকার সর্বোচ্চ ${process.env.MAX_FILE_SIZE_MB || 10}MB হতে পারবে` },
+        { status: 400 }
+      );
+    }
+
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const safeFilename = `${Date.now()}-${randomUUID().slice(0, 8)}.${ext}`;
+    const uploadDir = join(process.cwd(), "public", "uploads", folder);
+    await mkdir(uploadDir, { recursive: true });
+
+    const filePath = join(uploadDir, safeFilename);
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await writeFile(filePath, buffer);
+
+    const publicUrl = `/uploads/${folder}/${safeFilename}`;
+
+    const media = await prisma.media.create({
+      data: {
+        filename: safeFilename,
+        originalName: file.name,
+        mimeType: file.type,
+        size: file.size,
+        url: publicUrl,
+        folder,
+        category,
+        caption: caption || file.name,
+        altText: altText || file.name,
+        uploadedById: session.user.id,
+        isPublished: true,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      media,
+      url: publicUrl,
+    });
+  } catch (error) {
+    console.error("Media upload error:", error);
+    return NextResponse.json({ error: "ছবি আপলোড ব্যর্থ হয়েছে" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "ID required" }, { status: 400 });
+    }
+
+    const media = await prisma.media.findUnique({ where: { id } });
+    if (media) {
+      try {
+        const filePath = join(process.cwd(), "public", media.url);
+        await unlink(filePath);
+      } catch {
+        // file might not exist on disk
+      }
+      await prisma.media.delete({ where: { id } });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Delete media error:", error);
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  }
+}

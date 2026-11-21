@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { locales, type Locale } from "@/lib/i18n";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
+import AnnouncementPopup from "@/components/public/AnnouncementPopup";
 import { prisma } from "@/lib/prisma";
 
 export function generateStaticParams() {
@@ -21,7 +22,13 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const profile = await prisma.schoolProfile.findFirst();
+  const [profile, activePopup] = await Promise.all([
+    prisma.schoolProfile.findFirst(),
+    prisma.announcementPopup.findFirst({
+      where: { isActive: true },
+      orderBy: { updatedAt: "desc" },
+    }),
+  ]);
 
   const schoolName =
     locale === "bn"
@@ -45,6 +52,7 @@ export default async function LocaleLayout({
         facebookUrl={profile?.facebookUrl}
         youtubeUrl={profile?.youtubeUrl}
       />
+      <AnnouncementPopup popup={activePopup} locale={locale as Locale} />
     </div>
   );
 }
