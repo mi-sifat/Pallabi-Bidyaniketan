@@ -90,15 +90,27 @@ export default function ContactPage({
             </div>
           </div>
 
-          <div className="pt-4 border-t border-gray-100">
-            <h4 className="font-bold text-gray-900 text-xs mb-2">গুগল ম্যাপে অনুসন্ধান:</h4>
+          <div className="pt-4 border-t border-gray-100 space-y-3">
+            <h4 className="font-bold text-gray-900 text-xs">গুগল ম্যাপে আমাদের অবস্থান:</h4>
+            <div className="rounded-xl overflow-hidden h-48 w-full border border-gray-200 shadow-inner">
+              <iframe
+                src="https://maps.google.com/maps?q=Pallabi+Bidyaniketan,+Mirpur-7,+Dhaka&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Pallabi Bidyaniketan Map"
+                className="w-full h-full"
+              />
+            </div>
             <a
               href="https://maps.google.com/?q=Pallabi+Bidyaniketan+Mirpur-7+Dhaka"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-xs font-semibold text-[#1e3a5f] bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+              className="inline-block text-xs font-semibold text-[#1e3a5f] bg-gray-100 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors"
             >
-              Open in Google Maps &rarr;
+              Google Maps এ পূর্ণ স্ক্রিনে খুলুন &rarr;
             </a>
           </div>
         </div>

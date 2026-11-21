@@ -535,18 +535,17 @@ export default async function HomePage({
               </div>
             </div>
 
-            <div className="bg-white/10 rounded-2xl p-6 border border-white/20 text-center flex flex-col items-center justify-center min-h-[180px]">
-              <Building size={36} className="text-[#c9a84c] mb-2" />
-              <h4 className="font-bold text-base">{schoolName}</h4>
-              <p className="text-xs text-gray-300 mt-1">মিল্কভিটা রোড, মিরপুর-৭, ঢাকা-১২১৬</p>
-              <a
-                href="https://maps.google.com/?q=Pallabi+Bidyaniketan+Mirpur-7+Dhaka"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 text-xs font-bold bg-white text-[#1e3a5f] px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-sm"
-              >
-                Google Maps এ লোকেশন দেখুন &rarr;
-              </a>
+            <div className="rounded-2xl overflow-hidden border border-white/20 shadow-lg h-64 sm:h-72 w-full bg-slate-800">
+              <iframe
+                src="https://maps.google.com/maps?q=Pallabi+Bidyaniketan,+Mirpur-7,+Dhaka&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Pallabi Bidyaniketan Campus Map"
+                className="w-full h-full"
+              />
             </div>
           </div>
         </div>

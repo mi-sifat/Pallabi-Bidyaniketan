@@ -18,6 +18,14 @@ export default async function AdminTeachersPage() {
             নতুন শিক্ষক যোগ করুন, ছবি যুক্ত করুন এবং ওয়েবসাইটে দৃশ্যমানতা নিয়ন্ত্রণ করুন
           </p>
         </div>
+
+        <a
+          href="/admin/teachers/migration-review"
+          className="px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl text-xs font-bold inline-flex items-center gap-2 shadow-xs transition-colors self-start sm:self-auto"
+        >
+          <span>📸 ফটো মাইগ্রেশন রিভিউ (১৯+৬ জন অপেক্ষমান)</span>
+          <span>&rarr;</span>
+        </a>
       </div>
 
       <TeacherManager initialTeachers={teachers} />

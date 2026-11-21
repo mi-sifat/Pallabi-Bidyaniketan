@@ -1,0 +1,334 @@
+{
+  "totalExtracted": 25,
+  "totalExistingDb": 20,
+  "exactMatches": [
+    {
+      "extractedName": "MD. SHAHE ALAM",
+      "dbId": "cmwpzmr750002tuz46jpmwheh",
+      "dbNameEn": "MD. SHAHE ALAM",
+      "dbNameBn": "MD. SHAHE ALAM",
+      "currentPhoto": null,
+      "newPhotoFilename": "MD_SHAHE_ALAM_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01711222939",
+        "email": "bbniketan@hmail.com",
+        "designationEn": "Head Teacher"
+      }
+    },
+    {
+      "extractedName": "RAJIA SULTANA",
+      "dbId": "cmwpzmr9r0004tuz47idn73ow",
+      "dbNameEn": "RAJIA SULTANA",
+      "dbNameBn": "RAJIA SULTANA",
+      "currentPhoto": null,
+      "newPhotoFilename": "RAJIA_SULTANA_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01715667492",
+        "designationEn": "Assistant Head Teacher"
+      }
+    },
+    {
+      "extractedName": "HOSNEARA ROSY",
+      "dbId": "cmwpzmrve000ktuz437qmyyf4",
+      "dbNameEn": "HOSNEARA ROSY",
+      "dbNameBn": "HOSNEARA ROSY",
+      "currentPhoto": null,
+      "newPhotoFilename": "HOSNEARA_ROSY_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01712230445",
+        "designationEn": "Senior Teacher"
+      }
+    },
+    {
+      "extractedName": "MD. SHAFIQUL ALAM",
+      "dbId": "cmwpzmrxr000mtuz49p8e00go",
+      "dbNameEn": "MD. SHAFIQUL ALAM",
+      "dbNameBn": "MD. SHAFIQUL ALAM",
+      "currentPhoto": null,
+      "newPhotoFilename": "MD_SHAFIQUL_ALAM_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01711969259",
+        "email": "alam.mdshafiqul2@gmail.com",
+        "designationEn": "Senior Teacher"
+      }
+    },
+    {
+      "extractedName": "SHAHADAT HOSSAN",
+      "dbId": "cmwpzmrqf000gtuz4hbg871eg",
+      "dbNameEn": "SHAHADAT HOSSAN",
+      "dbNameBn": "SHAHADAT HOSSAN",
+      "currentPhoto": null,
+      "newPhotoFilename": "SHAHADAT_HOSSAN_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01712591043",
+        "email": "shahadat91843@gmail.com",
+        "designationEn": "Senior Teacher"
+      }
+    },
+    {
+      "extractedName": "PARVIN AKTER",
+      "dbId": "cmwpzmshm0012tuz4syfgcqh2",
+      "dbNameEn": "PARVIN AKTER",
+      "dbNameBn": "PARVIN AKTER",
+      "currentPhoto": null,
+      "newPhotoFilename": "PARVIN_AKTER_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01822954961",
+        "email": "pakhter540@gmail.com"
+      }
+    },
+    {
+      "extractedName": "FARHANA AKTER CHOWDHURY",
+      "dbId": "cmwpzms45000stuz454l512tl",
+      "dbNameEn": "FARHANA AKTER CHOWDHURY",
+      "dbNameBn": "FARHANA AKTER CHOWDHURY",
+      "currentPhoto": null,
+      "newPhotoFilename": "FARHANA_AKTER_CHOWDHURY_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01747262694",
+        "email": "chowdhuryfarhanaakter@gmail.com",
+        "designationEn": "Senior Teacher"
+      }
+    },
+    {
+      "extractedName": "GOLAM MOSTOFA",
+      "dbId": "cmwpzmrsr000ituz4qzrdtkcy",
+      "dbNameEn": "GOLAM MOSTOFA",
+      "dbNameBn": "GOLAM MOSTOFA",
+      "currentPhoto": null,
+      "newPhotoFilename": "GOLAM_MOSTOFA_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "designationEn": "Senior Teacher"
+      }
+    },
+    {
+      "extractedName": "SHAMSUN NAHAR",
+      "dbId": "cmwpzms1j000qtuz4izd5mnpm",
+      "dbNameEn": "SHAMSUN NAHAR",
+      "dbNameBn": "SHAMSUN NAHAR",
+      "currentPhoto": null,
+      "newPhotoFilename": "SHAMSUN_NAHAR_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01798015254",
+        "email": "shamsun980@gmail.com",
+        "designationEn": "Senior Teacher"
+      }
+    },
+    {
+      "extractedName": "Md. Jashim Uddin",
+      "dbId": "cmwpzmrc30006tuz4njzane29",
+      "dbNameEn": "MD. JASHIM UDDIN",
+      "dbNameBn": "MD. JASHIM UDDIN",
+      "currentPhoto": null,
+      "newPhotoFilename": "MD_JASHIM_UDDIN_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01818832536",
+        "email": "uddinjashim784@gmail.com",
+        "designationEn": "Senior Teacher"
+      }
+    },
+    {
+      "extractedName": "MD. RAFIQUL ISLAM",
+      "dbId": "cmwpzmrni000etuz41xkypjmi",
+      "dbNameEn": "RAFIQUL ISLAM",
+      "dbNameBn": "RAFIQUL ISLAM",
+      "currentPhoto": null,
+      "newPhotoFilename": "MD_RAFIQUL_ISLAM_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01710551627",
+        "email": "rafiqulislam301180@gmail.com"
+      }
+    },
+    {
+      "extractedName": "M.A. AL HABIBUR RAHMAN",
+      "dbId": "cmwpzmsjn0014tuz43g76v020",
+      "dbNameEn": "M.A. AL HABIBUR RAHMAN",
+      "dbNameBn": "M.A. AL HABIBUR RAHMAN",
+      "currentPhoto": null,
+      "newPhotoFilename": "M_A_AL_HABIBUR_RAHMAN_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "email": "alhabiburrahman1967@gmail.com"
+      }
+    },
+    {
+      "extractedName": "MD. FARUK HOSSAIN",
+      "dbId": "cmwpzms9p000wtuz4mfm2osk3",
+      "dbNameEn": "MD. FARUK HOSSAIN",
+      "dbNameBn": "MD. FARUK HOSSAIN",
+      "currentPhoto": null,
+      "newPhotoFilename": "MD_FARUK_HOSSAIN_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01715029749",
+        "designationEn": "Junior Teacher"
+      }
+    },
+    {
+      "extractedName": "MD. RUHUL AMIN",
+      "dbId": "cmwpzmsc2000ytuz48f2xtgrl",
+      "dbNameEn": "MD. RUHUL AMIN",
+      "dbNameBn": "MD. RUHUL AMIN",
+      "currentPhoto": null,
+      "newPhotoFilename": "MD_RUHUL_AMIN_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "email": "ruhul 3782@gmail.com",
+        "designationEn": "Senior Teacher"
+      }
+    },
+    {
+      "extractedName": "RAFIQUL ISLAM",
+      "dbId": "cmwpzmrni000etuz41xkypjmi",
+      "dbNameEn": "RAFIQUL ISLAM",
+      "dbNameBn": "RAFIQUL ISLAM",
+      "currentPhoto": null,
+      "newPhotoFilename": "DOWNLOAD_FAILED",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01711152579",
+        "email": "rafiqanan2024@gmail.com"
+      }
+    },
+    {
+      "extractedName": "ASIA KHATUN",
+      "dbId": "cmwpzmsf90010tuz49rbvgnbo",
+      "dbNameEn": "ASIA KHATUN",
+      "dbNameBn": "ASIA KHATUN",
+      "currentPhoto": null,
+      "newPhotoFilename": "ASIA_KHATUN_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01731088525",
+        "email": "khatunasia864@gmail.com"
+      }
+    },
+    {
+      "extractedName": "NIGAR SULTANA",
+      "dbId": "cmwpzms6t000utuz44bpaoc8o",
+      "dbNameEn": "NIGAR SULTANA",
+      "dbNameBn": "NIGAR SULTANA",
+      "currentPhoto": null,
+      "newPhotoFilename": "NIGAR_SULTANA_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01920706701",
+        "email": "nigar2146@gmail.com"
+      }
+    },
+    {
+      "extractedName": "BIRENDRA BIKRAM BISWAS",
+      "dbId": "cmwpzmrf10008tuz4thd3vrhh",
+      "dbNameEn": "BIRENDRA BIKRAM BISWAS",
+      "dbNameBn": "BIRENDRA BIKRAM BISWAS",
+      "currentPhoto": null,
+      "newPhotoFilename": "BIRENDRA_BIKRAM_BISWAS_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01715068463",
+        "email": "drbikram24@gmail.com"
+      }
+    },
+    {
+      "extractedName": "MD. YOUNUS MIA",
+      "dbId": "cmwpzmrhn000atuz4vrryo65w",
+      "dbNameEn": "MD. YOUNUS MIA",
+      "dbNameBn": "MD. YOUNUS MIA",
+      "currentPhoto": null,
+      "newPhotoFilename": "MD_YOUNUS_MIA_1.jpg",
+      "hasProposedUpdates": true,
+      "updates": {
+        "phone": "01711266421",
+        "email": "younusmia10@gmail.com"
+      }
+    }
+  ],
+  "partialMatches": [],
+  "newTeachers": [
+    {
+      "originalImageUrl": "https://aztechbd.net:8443/ords/bbn/teacher_img/get/E000012",
+      "name": "Bilkis Nahar",
+      "designation": "Assistant Teacher",
+      "mobile": "01716228755",
+      "email": "",
+      "imageFilename": "BILKIS_NAHAR_1.jpg",
+      "imagePath": "E:\\mis project\\Pallabi Bidyaniketan\\pallabi-school\\teacher-photos\\BILKIS_NAHAR_1.jpg",
+      "imageSize": 86589,
+      "hash": "b409ef1fbe222513b600a2b2a0367acc",
+      "isDuplicateImage": false
+    },
+    {
+      "originalImageUrl": "https://aztechbd.net:8443/ords/bbn/teacher_img/get/E000015",
+      "name": "MONIRA BEUGM",
+      "designation": "Assistant Teacher",
+      "mobile": "01725160139",
+      "email": "",
+      "imageFilename": "MONIRA_BEUGM_1.jpg",
+      "imagePath": "E:\\mis project\\Pallabi Bidyaniketan\\pallabi-school\\teacher-photos\\MONIRA_BEUGM_1.jpg",
+      "imageSize": 113231,
+      "hash": "3dbd14a3cc95f51b9e6928a2a075dba9",
+      "isDuplicateImage": false
+    },
+    {
+      "originalImageUrl": "https://aztechbd.net:8443/ords/bbn/teacher_img/get/E000018",
+      "name": "YASMIN AKHTER",
+      "designation": "Assistant Teacher",
+      "mobile": "01715786888",
+      "email": "yesmina613@gmain",
+      "imageFilename": "YASMIN_AKHTER_1.jpg",
+      "imagePath": "E:\\mis project\\Pallabi Bidyaniketan\\pallabi-school\\teacher-photos\\YASMIN_AKHTER_1.jpg",
+      "imageSize": 23736,
+      "hash": "532df62a633f6d43b074423555b90b99",
+      "isDuplicateImage": false
+    },
+    {
+      "originalImageUrl": "https://aztechbd.net:8443/ords/bbn/teacher_img/get/E000021",
+      "name": "MD. ADBUL HAKIM",
+      "designation": "Assistant Teacher",
+      "mobile": "017256679291",
+      "email": "",
+      "imageFilename": "MD_ADBUL_HAKIM_1.jpg",
+      "imagePath": "E:\\mis project\\Pallabi Bidyaniketan\\pallabi-school\\teacher-photos\\MD_ADBUL_HAKIM_1.jpg",
+      "imageSize": 59943,
+      "hash": "b2d4da91abbec3a71f648fb57f01730f",
+      "isDuplicateImage": false
+    },
+    {
+      "originalImageUrl": "https://aztechbd.net:8443/ords/bbn/teacher_img/get/E000023",
+      "name": "MD. KAMRUL HASAN",
+      "designation": "Assistant Teacher",
+      "mobile": "01725651111",
+      "email": "kamrul137@yahoo.com",
+      "imageFilename": "MD_KAMRUL_HASAN_1.jpg",
+      "imagePath": "E:\\mis project\\Pallabi Bidyaniketan\\pallabi-school\\teacher-photos\\MD_KAMRUL_HASAN_1.jpg",
+      "imageSize": 97655,
+      "hash": "5bfe8ea8b3e451b18706b7421a501da3",
+      "isDuplicateImage": false
+    },
+    {
+      "originalImageUrl": "https://aztechbd.net:8443/ords/bbn/teacher_img/get/E000025",
+      "name": "MD. ASHRAFUL ISLAM",
+      "designation": "Assistant Teacher",
+      "mobile": "01861848520",
+      "email": "",
+      "imageFilename": "MD_ASHRAFUL_ISLAM_1.jpg",
+      "imagePath": "E:\\mis project\\Pallabi Bidyaniketan\\pallabi-school\\teacher-photos\\MD_ASHRAFUL_ISLAM_1.jpg",
+      "imageSize": 67746,
+      "hash": "74581e02b92f3005a525417ee7eaa331",
+      "isDuplicateImage": false
+    }
+  ],
+  "duplicatePhotosFound": [],
+  "proposedUpdates": []
+}

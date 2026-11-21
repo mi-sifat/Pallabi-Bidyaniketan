@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight, Play, Pause } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 
 export interface SlideData {
@@ -26,6 +26,8 @@ export default function HomepageSlider({
   locale?: Locale;
 }) {
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
 
   // Fallback default slide if none in database
   const effectiveSlides: SlideData[] =
@@ -34,7 +36,7 @@ export default function HomepageSlider({
       : [
           {
             id: "default-1",
-            imageUrl: "/uploads/facebook/5776d963-54ed-45c4-8513-96c1b503a37e.png",
+            imageUrl: "/uploads/gallery/662644585_1543229637808768_3354893254043817335_n.jpg",
             titleBn: "পল্লবী বিদ্যানিকেতন — শিক্ষার আলোয় গড়ি ভবিষ্যৎ",
             titleEn: "Pallabi Bidyaniketan — Building Future with Quality Education",
             subtitleBn:
@@ -47,13 +49,16 @@ export default function HomepageSlider({
           },
         ];
 
+  // Autoplay with pause on hover
   useEffect(() => {
-    if (effectiveSlides.length <= 1) return;
-    const interval = setInterval(() => {
+    if (effectiveSlides.length <= 1 || isPaused) return;
+
+    const timer = setInterval(() => {
       setCurrentIdx((prev) => (prev + 1) % effectiveSlides.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [effectiveSlides.length]);
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [effectiveSlides.length, isPaused]);
 
   const prevSlide = () => {
     setCurrentIdx((prev) => (prev === 0 ? effectiveSlides.length - 1 : prev - 1));
@@ -63,61 +68,86 @@ export default function HomepageSlider({
     setCurrentIdx((prev) => (prev + 1) % effectiveSlides.length);
   };
 
+  // Touch Swipe for Mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (diff > 50) nextSlide();
+    else if (diff < -50) prevSlide();
+    touchStartX.current = null;
+  };
+
   const current = effectiveSlides[currentIdx];
   const title = locale === "bn" ? current.titleBn || current.titleEn : current.titleEn || current.titleBn;
   const subtitle = locale === "bn" ? current.subtitleBn || current.subtitleEn : current.subtitleEn || current.subtitleBn;
   const buttonText = locale === "bn" ? current.buttonTextBn || current.buttonTextEn : current.buttonTextEn || current.buttonTextBn;
 
   return (
-    <div className="relative w-full h-[400px] sm:h-[480px] md:h-[560px] overflow-hidden bg-slate-900 group">
-      {/* Background Image with smooth transition & Next.js Image Optimization */}
-      {effectiveSlides.map((slide, index) => (
-        <div
-          key={slide.id}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            index === currentIdx ? "opacity-100 z-10 scale-100" : "opacity-0 z-0 scale-105"
-          }`}
-          style={{ transition: "opacity 1000ms ease-in-out, transform 7000ms ease-out" }}
-        >
-          <Image
-            src={slide.imageUrl}
-            alt={slide.titleBn || "School banner"}
-            fill
-            priority={index === 0}
-            sizes="100vw"
-            quality={85}
-            className="object-cover"
-          />
-          {/* Subtle multi-layer overlay for rich text readability */}
-          <div className="absolute inset-0 bg-linear-to-r from-black/85 via-black/50 to-transparent" />
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-black/30" />
-        </div>
-      ))}
+    <div
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="relative w-full h-[400px] sm:h-[480px] md:h-[540px] lg:h-[580px] overflow-hidden bg-slate-950 group select-none"
+    >
+      {/* Background Slides with Crossfade Animation */}
+      {effectiveSlides.map((slide, index) => {
+        const isCurrent = index === currentIdx;
+        return (
+          <div
+            key={slide.id}
+            aria-hidden={!isCurrent}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              isCurrent ? "opacity-100 z-10 pointer-events-auto" : "opacity-0 z-0 pointer-events-none"
+            }`}
+          >
+            <Image
+              src={slide.imageUrl}
+              alt={slide.titleBn || "School banner"}
+              fill
+              priority={index === 0}
+              sizes="100vw"
+              quality={85}
+              className={`object-cover transform transition-transform duration-7000 ease-out ${
+                isCurrent ? "scale-105" : "scale-100"
+              }`}
+            />
+
+            {/* Gradient Overlays for High-Contrast Text Legibility */}
+            <div className="absolute inset-0 bg-linear-to-r from-black/85 via-black/55 to-black/30" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-black/40" />
+          </div>
+        );
+      })}
 
       {/* Content Overlay */}
-      <div className="relative z-20 container mx-auto px-4 h-full flex flex-col justify-center max-w-6xl">
-        <div className="max-w-2xl space-y-4">
-          <div className="inline-flex items-center gap-2 bg-[#c9a84c] text-[#1e3a5f] text-[11px] sm:text-xs font-extrabold px-3 py-1 rounded-full shadow-sm">
+      <div className="relative z-20 container mx-auto px-4 sm:px-6 h-full flex flex-col justify-center max-w-6xl">
+        <div className="max-w-2xl space-y-3 sm:space-y-4 text-left">
+          <div className="inline-flex items-center gap-2 bg-[#c9a84c] text-[#1e3a5f] text-[10px] sm:text-xs font-black px-3 py-1 rounded-full shadow-md uppercase tracking-wider">
             <span>EIIN: ১০৮৩২৫</span>
             <span>•</span>
             <span>মিরপুর-৭, ঢাকা</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight drop-shadow-md">
+          <h1 className="text-xl sm:text-3xl md:text-5xl font-black text-white leading-tight sm:leading-snug drop-shadow-md">
             {title}
           </h1>
 
           {subtitle && (
-            <p className="text-xs sm:text-sm md:text-base text-gray-200 leading-relaxed max-w-xl drop-shadow">
+            <p className="text-xs sm:text-sm md:text-base text-gray-200 leading-relaxed max-w-xl drop-shadow line-clamp-2 sm:line-clamp-3">
               {subtitle}
             </p>
           )}
 
           {current.buttonUrl && buttonText && (
-            <div className="pt-2">
+            <div className="pt-2 sm:pt-4">
               <Link
                 href={current.buttonUrl}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#c9a84c] hover:bg-amber-400 text-[#1e3a5f] font-extrabold text-xs sm:text-sm rounded-xl shadow-lg transition-all hover:scale-105"
+                className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-[#c9a84c] hover:bg-amber-400 text-[#1e3a5f] font-extrabold text-xs sm:text-sm rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95"
               >
                 <span>{buttonText}</span>
                 <ArrowRight size={16} />
@@ -127,13 +157,13 @@ export default function HomepageSlider({
         </div>
       </div>
 
-      {/* Prev / Next Controls */}
+      {/* Prev / Next Navigation Arrows */}
       {effectiveSlides.length > 1 && (
         <>
           <button
             type="button"
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs transition-all cursor-pointer opacity-80 group-hover:opacity-100"
+            className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center backdrop-blur-xs transition-all cursor-pointer opacity-70 group-hover:opacity-100 hover:scale-105"
             aria-label="Previous Slide"
           >
             <ChevronLeft size={22} />
@@ -141,21 +171,21 @@ export default function HomepageSlider({
           <button
             type="button"
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs transition-all cursor-pointer opacity-80 group-hover:opacity-100"
+            className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center backdrop-blur-xs transition-all cursor-pointer opacity-70 group-hover:opacity-100 hover:scale-105"
             aria-label="Next Slide"
           >
             <ChevronRight size={22} />
           </button>
 
-          {/* Dots Indicators */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
+          {/* Indicators / Progress Dots */}
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 bg-black/30 backdrop-blur-xs px-3 py-1.5 rounded-full border border-white/10">
             {effectiveSlides.map((_, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => setCurrentIdx(idx)}
-                className={`h-2 rounded-full transition-all cursor-pointer ${
-                  idx === currentIdx ? "w-7 bg-[#c9a84c]" : "w-2 bg-white/50 hover:bg-white"
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                  idx === currentIdx ? "w-6 sm:w-8 bg-[#c9a84c]" : "w-2 bg-white/40 hover:bg-white/70"
                 }`}
                 aria-label={`Slide ${idx + 1}`}
               />
