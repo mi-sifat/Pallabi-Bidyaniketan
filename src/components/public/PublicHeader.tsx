@@ -29,7 +29,14 @@ const navItems: NavItem[] = [
   { key: "nav.admission", href: "/admission" },
   { key: "nav.results", href: "/results" },
   { key: "nav.notices", href: "/notices" },
-  { key: "nav.news", href: "/news" },
+  {
+    key: "nav.news",
+    href: "/news",
+    children: [
+      { key: "nav.news", href: "/news" },
+      { key: "nav.events", href: "/events" },
+    ],
+  },
   { key: "nav.gallery", href: "/gallery" },
   { key: "nav.downloads", href: "/downloads" },
   { key: "nav.contact", href: "/contact" },

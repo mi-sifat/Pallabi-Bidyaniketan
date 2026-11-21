@@ -390,8 +390,15 @@ model News {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
+  // 3-way linking
+  eventId      String?
+  albumId      String?
+
   translations NewsTranslation[]
-  createdBy    User?     @relation("NewsCreator", fields: [createdById], references: [id])
+  createdBy    User?         @relation("NewsCreator", fields: [createdById], references: [id])
+  album        GalleryAlbum? @relation("NewsAlbum", fields: [albumId], references: [id])
+  event        SchoolEvent?  @relation("NewsEvent", fields: [eventId], references: [id])
+  fbImports    FacebookImport[]
 
   @@map("news")
 }
@@ -414,6 +421,34 @@ model NewsTranslation {
 }
 
 // ─────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────
+
+model SchoolEvent {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  titleEn       String
+  titleBn       String?
+  descriptionEn String?
+  descriptionBn String?
+  eventDate     DateTime?
+  location      String?
+  category      String?  @default("Cultural")
+  coverImageUrl String?
+  status        ContentStatus @default(DRAFT)
+  isPublished   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  albumId       String?
+  album         GalleryAlbum? @relation("EventAlbum", fields: [albumId], references: [id])
+  news          News[]        @relation("NewsEvent")
+  fbImports     FacebookImport[]
+
+  @@map("school_events")
+}
+
+// ─────────────────────────────────────────────
 // GALLERY
 // ─────────────────────────────────────────────
 
@@ -433,7 +468,14 @@ model GalleryAlbum {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // 3-way linking
+  eventId     String?
+  newsId      String?
+
   images      GalleryImage[]
+  news        News[]           @relation("NewsAlbum")
+  events      SchoolEvent[]    @relation("EventAlbum")
+  fbImports   FacebookImport[]
 
   @@map("gallery_albums")
 }
@@ -626,7 +668,14 @@ model Media {
   thumbnailUrl String?
   altText      String?
   caption      String?
-  folder       String?
+  folder       String?  @default("general")
+  category     String?  @default("general")
+  sourceUrl    String?
+  sourcePostUrl String?
+  verificationStatus VerificationStatus @default(VERIFIED)
+  isPublished  Boolean  @default(true)
+  eventId      String?
+  albumId      String?
   uploadedById String?
   createdAt    DateTime @default(now())
 
@@ -716,6 +765,37 @@ model MigrationRecord {
   updatedAt       DateTime @updatedAt
 
   @@map("migration_records")
+}
+
+// ─────────────────────────────────────────────
+// FACEBOOK PAGE CONTENT IMPORTS
+// ─────────────────────────────────────────────
+
+model FacebookImport {
+  id              String   @id @default(cuid())
+  fbPostId        String?  @unique
+  fbPostUrl       String?
+  caption         String?
+  postedAt        DateTime?
+  eventTitle      String?
+  eventCategory   String?  @default("Event") // Sports, Cultural, Academic, Celebration, Campus, Reunion
+  sourceType      String   @default("MANUAL_OR_PUBLIC") // GRAPH_API, PUBLIC_PAGE, MANUAL_EXPORT, ADMIN_UPLOAD
+  mediaUrls       String?  // JSON stringified array of stored media files
+  albumId         String?
+  newsId          String?
+  eventId         String?
+  status          ContentStatus @default(PENDING_APPROVAL)
+  verificationStatus VerificationStatus @default(PENDING_VERIFICATION)
+  isDuplicate     Boolean  @default(false)
+  adminNotes      String?
+  importedAt      DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  album           GalleryAlbum? @relation(fields: [albumId], references: [id])
+  news            News?         @relation(fields: [newsId], references: [id])
+  event           SchoolEvent?  @relation(fields: [eventId], references: [id])
+
+  @@map("facebook_imports")
 }
 
 // ─────────────────────────────────────────────

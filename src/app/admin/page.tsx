@@ -152,6 +152,24 @@ export default async function AdminDashboardPage() {
 
           <div className="grid grid-cols-2 gap-3 text-xs">
             <Link
+              href="/admin/facebook-import"
+              className="p-3 bg-blue-50 hover:bg-blue-100 rounded-xl font-bold text-blue-900 transition-colors block text-center border border-blue-200"
+            >
+              🌐 ফেসবুক পোস্ট ও ছবি আমদানি
+            </Link>
+            <Link
+              href="/admin/media"
+              className="p-3 bg-gray-50 hover:bg-gray-100 rounded-xl font-semibold text-gray-800 transition-colors block text-center border border-gray-100"
+            >
+              📁 মিডিয়া লাইব্রেরি ও স্টোরেজ
+            </Link>
+            <Link
+              href="/admin/events"
+              className="p-3 bg-gray-50 hover:bg-gray-100 rounded-xl font-semibold text-gray-800 transition-colors block text-center border border-gray-100"
+            >
+              📅 ইভেন্ট ও অনুষ্ঠানসূচি
+            </Link>
+            <Link
               href="/admin/teachers"
               className="p-3 bg-gray-50 hover:bg-gray-100 rounded-xl font-semibold text-gray-800 transition-colors block text-center border border-gray-100"
             >
@@ -168,12 +186,6 @@ export default async function AdminDashboardPage() {
               className="p-3 bg-gray-50 hover:bg-gray-100 rounded-xl font-semibold text-gray-800 transition-colors block text-center border border-gray-100"
             >
               ⚙️ স্কুল প্রোফাইল ও লোগো
-            </Link>
-            <Link
-              href="/admin/migration"
-              className="p-3 bg-gray-50 hover:bg-gray-100 rounded-xl font-semibold text-gray-800 transition-colors block text-center border border-gray-100"
-            >
-              🌐 মাইগ্রেশন হিস্টোরি
             </Link>
           </div>
         </div>

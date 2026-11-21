@@ -12,6 +12,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/admission",
     "/results",
     "/notices",
+    "/news",
+    "/events",
     "/gallery",
     "/downloads",
     "/contact",

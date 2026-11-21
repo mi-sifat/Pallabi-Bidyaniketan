@@ -8,26 +8,34 @@ import {
   Bell,
   Newspaper,
   Image as GalleryIcon,
-  FileCheck2,
   Download,
   Settings,
   Mail,
   ShieldAlert,
   Database,
-  GraduationCap,
   Award,
   BookOpen,
+  Share2 as FacebookIcon,
+  FolderOpen,
+  Calendar,
+  Building2,
 } from "lucide-react";
 
 const navigation = [
   { name: "ড্যাশবোর্ড (Dashboard)", href: "/admin", icon: LayoutDashboard },
-  { name: "ভেরিফিকেশন কেন্দ্র (Verification)", href: "/admin/verification", icon: ShieldAlert },
-  { name: "মাইগ্রেশন ও উৎস রিভিউ (Migration)", href: "/admin/migration", icon: Database },
+  { name: "ফেসবুক ইমপোর্ট (FB Import)", href: "/admin/facebook-import", icon: FacebookIcon },
+  { name: "মিডিয়া লাইব্রেরি (Media)", href: "/admin/media", icon: FolderOpen },
+  { name: "ভেরিফিকেশন কেন্দ্র (Verify)", href: "/admin/verification", icon: ShieldAlert },
   { name: "শিক্ষক ব্যবস্থাপনা (Teachers)", href: "/admin/teachers", icon: Users },
+  { name: "প্রশাসন ও কমিটি (Administration)", href: "/admin/administration", icon: Building2 },
   { name: "নোটিশ প্রকাশনা (Notices)", href: "/admin/notices", icon: Bell },
+  { name: "সংবাদ ও ব্লগ (News/Blog)", href: "/admin/news", icon: Newspaper },
+  { name: "ইভেন্ট সূচি (Events)", href: "/admin/events", icon: Calendar },
+  { name: "ফটো গ্যালারি (Gallery)", href: "/admin/gallery", icon: GalleryIcon },
   { name: "একাডেমিক তথ্য (Academics)", href: "/admin/academics", icon: BookOpen },
   { name: "ফলাফল আর্কাইভ (Results)", href: "/admin/results", icon: Award },
   { name: "ডাউনলোড ও ফরম (Downloads)", href: "/admin/downloads", icon: Download },
+  { name: "মাইগ্রেশন রিভিউ (Migration)", href: "/admin/migration", icon: Database },
   { name: "যোগাযোগ বার্তা (Inbox)", href: "/admin/contact", icon: Mail },
   { name: "প্রতিষ্ঠান সেটিংস (Settings)", href: "/admin/settings", icon: Settings },
 ];
@@ -73,7 +81,7 @@ export default function AdminSidebar() {
       </nav>
 
       <div className="p-4 border-t border-white/10 text-[11px] text-gray-400">
-        সংস্করণ: ২.০ (প্রোডাকশন রেডি)
+        সংস্করণ: ২.১ (ফেসবুক ইন্টিগ্রেশন আপগ্রেড)
       </div>
     </aside>
   );
