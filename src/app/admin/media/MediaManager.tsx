@@ -10,7 +10,10 @@ import {
   Copy,
   Check,
   ExternalLink,
-  Filter,
+  Edit,
+  AlertTriangle,
+  X,
+  Info,
 } from "lucide-react";
 import { formatFileSize } from "@/lib/utils";
 
@@ -38,17 +41,27 @@ export default function MediaManager({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [editItem, setEditItem] = useState<MediaItem | null>(null);
+  const [editCaption, setEditCaption] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [inUseWarning, setInUseWarning] = useState<{ id: string; message: string; places: string[] } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const categories = [
     { key: "all", label: "সব ছবি" },
     { key: "general", label: "সাধারণ" },
+    { key: "gallery", label: "ফটো গ্যালারি" },
     { key: "slider", label: "হোমপেজ স্লাইডার" },
     { key: "teachers", label: "শিক্ষক প্রোফাইল" },
     { key: "events", label: "অনুষ্ঠান ও ইভেন্ট" },
-    { key: "gallery", label: "ফটো গ্যালারি" },
     { key: "popup", label: "ঘোষণা পপ-আপ" },
   ];
+
+  const showToast = (type: "success" | "error", text: string) => {
+    setFeedback({ type, text });
+    setTimeout(() => setFeedback(null), 4000);
+  };
 
   const filteredMedia = mediaList.filter((item) => {
     const matchesCategory =
@@ -83,24 +96,42 @@ export default function MediaManager({
           setMediaList((prev) => [data.media, ...prev]);
         }
       }
+      showToast("success", "ছবি সফলভাবে লাইব্রেরিতে আপলোড করা হয়েছে");
     } catch (err) {
       console.error("Upload error:", err);
-      alert("ছবি আপলোড করার সময় সমস্যা হয়েছে");
+      showToast("error", "ছবি আপলোড করার সময় সমস্যা হয়েছে");
     } finally {
       setUploading(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("আপনি কি নিশ্চিতভাবে এই ছবিটি মুছে ফেলতে চান?")) return;
+  const handleDelete = async (id: string, force: boolean = false) => {
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/admin/media?id=${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setMediaList((prev) => prev.filter((m) => m.id !== id));
+      const res = await fetch(`/api/admin/media?id=${id}${force ? "&force=true" : ""}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (res.status === 409 && data.inUse) {
+        setInUseWarning({
+          id,
+          message: data.error,
+          places: data.places || [],
+        });
+        return;
       }
-    } catch (err) {
-      console.error("Delete error:", err);
+
+      if (!res.ok) {
+        throw new Error(data.error || "মুছে ফেলা যায়নি");
+      }
+
+      setMediaList((prev) => prev.filter((m) => m.id !== id));
+      setInUseWarning(null);
+      showToast("success", "ছবি সফলভাবে মুছে ফেলা হয়েছে");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "সমস্যা হয়েছে";
+      showToast("error", msg);
     } finally {
       setDeletingId(null);
     }
@@ -112,8 +143,61 @@ export default function MediaManager({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const openEditModal = (item: MediaItem) => {
+    setEditItem(item);
+    setEditCaption(item.caption || item.originalName || "");
+    setEditCategory(item.category || "general");
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editItem) return;
+    try {
+      const res = await fetch("/api/admin/media", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editItem.id,
+          caption: editCaption,
+          altText: editCaption,
+          category: editCategory,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "আপডেট ব্যর্থ");
+
+      setMediaList((prev) =>
+        prev.map((m) =>
+          m.id === editItem.id
+            ? { ...m, caption: editCaption, category: editCategory }
+            : m
+        )
+      );
+      setEditItem(null);
+      showToast("success", "ছবির বিবরণ আপডেট করা হয়েছে");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "সমস্যা হয়েছে";
+      showToast("error", msg);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Toast Feedback */}
+      {feedback && (
+        <div
+          className={`p-3.5 rounded-xl border flex items-center justify-between text-xs font-semibold ${
+            feedback.type === "success"
+              ? "bg-green-50 text-green-800 border-green-200"
+              : "bg-red-50 text-red-800 border-red-200"
+          }`}
+        >
+          <span>{feedback.text}</span>
+          <button type="button" onClick={() => setFeedback(null)}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {/* Upload Dropzone */}
       <div
         onDragOver={(e) => {
@@ -165,7 +249,7 @@ export default function MediaManager({
               key={cat.key}
               type="button"
               onClick={() => setSelectedCategory(cat.key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 selectedCategory === cat.key
                   ? "bg-[#1e3a5f] text-white shadow-xs"
                   : "bg-gray-100 hover:bg-gray-200 text-gray-700"
@@ -221,11 +305,20 @@ export default function MediaManager({
                   <button
                     type="button"
                     onClick={() => handleCopy(item.url, item.id)}
-                    className="text-gray-500 hover:text-[#1e3a5f] p-1 text-[11px] inline-flex items-center gap-1"
+                    className="text-gray-500 hover:text-[#1e3a5f] p-1 text-[11px] inline-flex items-center gap-1 cursor-pointer"
                     title="লিংক কপি করুন"
                   >
                     {copiedId === item.id ? <Check size={13} className="text-green-600" /> : <Copy size={13} />}
                     <span className="text-[10px]">{copiedId === item.id ? "কপি হয়েছে" : "লিংক"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openEditModal(item)}
+                    className="text-gray-500 hover:text-[#1e3a5f] p-1 cursor-pointer"
+                    title="সম্পাদনা করুন"
+                  >
+                    <Edit size={13} />
                   </button>
 
                   <a
@@ -240,9 +333,9 @@ export default function MediaManager({
 
                   <button
                     type="button"
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => handleDelete(item.id, false)}
                     disabled={deletingId === item.id}
-                    className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50"
+                    className="text-red-500 hover:text-red-700 p-1 disabled:opacity-50 cursor-pointer"
                     title="মুছে ফেলুন"
                   >
                     {deletingId === item.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
@@ -259,6 +352,119 @@ export default function MediaManager({
           <p className="text-xs">
             উপরের বক্সে ক্লিক করে আপনার কম্পিউটার থেকে ছবি আপলোড করুন
           </p>
+        </div>
+      )}
+
+      {/* In-Use Deletion Warning Modal */}
+      {inUseWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 max-w-md w-full space-y-4">
+            <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+              <AlertTriangle size={24} />
+            </div>
+            <div className="text-center">
+              <h3 className="font-bold text-gray-900 text-sm sm:text-base">
+                ছবিটি বর্তমানে ব্যবহৃত হচ্ছে
+              </h3>
+              <p className="text-xs text-gray-600 mt-2">
+                এই ছবিটি ওয়েবসাইটের নিম্নলিখিত স্থানে সংযুক্ত আছে:
+              </p>
+              <div className="mt-2 p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 text-left font-medium space-y-1">
+                {inUseWarning.places.map((place, idx) => (
+                  <div key={idx} className="flex items-start gap-1.5">
+                    <span>•</span>
+                    <span>{place}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-gray-500 mt-3">
+                নিরাপত্তার স্বার্থে, প্রথমে সংশ্লিষ্ট সেকশন থেকে ছবিটি পরিবর্তন করুন অথবা আপনি যদি নিশ্চিত হন তবেই এটি স্থায়ীভাবে মুছুন।
+              </p>
+            </div>
+            <div className="flex gap-2 justify-end pt-2 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setInUseWarning(null)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
+              >
+                বাতিল করুন
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(inUseWarning.id, true)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold cursor-pointer"
+              >
+                বাধ্যতামূলক ডিলিট করুন (Force Delete)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Media Modal */}
+      {editItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 max-w-sm w-full space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <h3 className="font-bold text-[#1e3a5f] text-sm">ছবির বিবরণ সম্পাদনা</h3>
+              <button type="button" onClick={() => setEditItem(null)}>
+                <X size={16} className="text-gray-400" />
+              </button>
+            </div>
+
+            <div className="h-32 rounded-xl overflow-hidden bg-gray-50 border">
+              <img src={editItem.url} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  ক্যাপশন / শিরোনাম
+                </label>
+                <input
+                  type="text"
+                  value={editCaption}
+                  onChange={(e) => setEditCaption(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[#1e3a5f]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  ক্যাটাগরি
+                </label>
+                <select
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[#1e3a5f]"
+                >
+                  <option value="general">সাধারণ</option>
+                  <option value="gallery">ফটো গ্যালারি</option>
+                  <option value="slider">হোমপেজ স্লাইডার</option>
+                  <option value="teachers">শিক্ষক প্রোফাইল</option>
+                  <option value="events">অনুষ্ঠান ও ইভেন্ট</option>
+                  <option value="popup">ঘোষণা পপ-আপ</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setEditItem(null)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                বাতিল
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                className="px-4 py-2 bg-[#1e3a5f] hover:bg-[#2b5182] text-white rounded-lg text-xs font-bold"
+              >
+                সংরক্ষণ করুন
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

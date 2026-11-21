@@ -140,7 +140,7 @@ export default function TeacherManager({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           isPublished: newStatus,
-          status: newStatus ? "PUBLISHED" : "PENDING_VERIFICATION",
+          status: newStatus ? "PUBLISHED" : "DRAFT",
         }),
       });
       if (res.ok) {

@@ -30,7 +30,7 @@ const navigation = [
   { name: "মিডিয়া লাইব্রেরি (Media)", href: "/admin/media", icon: FolderOpen },
   { name: "প্রতিষ্ঠান ও ক্লাস (School Info)", href: "/admin/academics", icon: BookOpen },
   { name: "ওয়েবসাইট সেটিংস (Settings)", href: "/admin/settings", icon: Settings },
-  { name: "ভেরিফিকেশন কেন্দ্র (Verify)", href: "/admin/verification", icon: ShieldAlert },
+  { name: "অনুমোদন ও রিভিউ (Review)", href: "/admin/verification", icon: ShieldAlert },
   { name: "যোগাযোগ বার্তা (Inbox)", href: "/admin/contact", icon: Mail },
 ];
 
@@ -61,11 +61,10 @@ export default function AdminSidebar() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                isActive
-                  ? "bg-[#c9a84c] text-[#1e3a5f] font-bold shadow-sm"
-                  : "text-gray-200 hover:bg-white/10 hover:text-white"
-              }`}
+              className={`flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs font-medium transition-all ${isActive
+                ? "bg-[#c9a84c] text-[#1e3a5f] font-bold shadow-sm"
+                : "text-gray-200 hover:bg-white/10 hover:text-white"
+                }`}
             >
               <Icon size={16} />
               <span>{item.name}</span>

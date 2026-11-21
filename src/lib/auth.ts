@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import type { UserRole } from "@prisma/client";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "pallabi-school-secret-dev-2024-jwt-key",
   session: { strategy: "jwt", maxAge: 8 * 60 * 60 }, // 8 hours
   pages: {
     signIn: "/admin/login",

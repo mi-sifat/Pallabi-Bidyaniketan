@@ -130,14 +130,14 @@ export default function MediaPicker({
       {label && <label className="block text-xs font-semibold text-gray-700">{label}</label>}
 
       {/* Selected Image Display */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         {value ? (
           <div className="relative group w-24 h-24 rounded-xl border border-gray-200 overflow-hidden bg-gray-50 shrink-0 shadow-sm">
             <img src={value} alt="Selected" className="w-full h-full object-cover" />
             <button
               type="button"
               onClick={() => onChange("")}
-              className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow-md transition-all cursor-pointer"
               title="ছবি সরিয়ে ফেলুন"
             >
               <X size={12} />
@@ -150,19 +150,33 @@ export default function MediaPicker({
           </div>
         )}
 
-        <div className="space-y-1.5">
-          <button
-            type="button"
-            onClick={() => {
-              setIsOpen(true);
-              setPreviewFile(null);
-              setPreviewUrl(null);
-            }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1e3a5f] hover:bg-[#2b5182] text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
-          >
-            <FolderOpen size={14} />
-            {value ? "ছবি পরিবর্তন করুন" : "ছবি যুক্ত করুন"}
-          </button>
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(true);
+                setPreviewFile(null);
+                setPreviewUrl(null);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1e3a5f] hover:bg-[#2b5182] text-white text-xs font-semibold rounded-lg shadow-xs transition-all cursor-pointer"
+            >
+              <FolderOpen size={14} />
+              {value ? "ছবি পরিবর্তন করুন" : "ছবি যুক্ত করুন"}
+            </button>
+
+            {value && (
+              <button
+                type="button"
+                onClick={() => onChange("")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold rounded-lg border border-red-200 transition-all cursor-pointer"
+                title="এই সেকশন থেকে ছবিটি সরিয়ে ফেলুন"
+              >
+                <X size={13} />
+                ছবি সরিয়ে ফেলুন
+              </button>
+            )}
+          </div>
           {helpText && <p className="text-[11px] text-gray-500">{helpText}</p>}
         </div>
       </div>
