@@ -87,7 +87,14 @@ export default function HomepageSlider({
       onTouchEnd={handleTouchEnd}
       className="relative w-full h-[420px] sm:h-[480px] md:h-[540px] lg:h-[580px] overflow-hidden bg-slate-950 group select-none"
     >
-      {/* Slides Container */}
+      {/* Sliding Track — all slides in a flex row, one slide = 100vw */}
+      <div
+        className="absolute top-0 left-0 h-full flex transition-transform duration-700 ease-in-out"
+        style={{
+          width: `${effectiveSlides.length * 100}vw`,
+          transform: `translateX(-${currentIdx * (100 / effectiveSlides.length)}%)`,
+        }}
+      >
       {effectiveSlides.map((slide, index) => {
         const isCurrent = index === currentIdx;
         const title =
@@ -107,9 +114,8 @@ export default function HomepageSlider({
           <div
             key={slide.id}
             aria-hidden={!isCurrent}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              isCurrent ? "opacity-100 z-10 pointer-events-auto" : "opacity-0 z-0 pointer-events-none"
-            }`}
+            className="relative h-full"
+            style={{ width: "100vw" }}
           >
             {/* Background Image */}
             <Image
@@ -179,6 +185,7 @@ export default function HomepageSlider({
           </div>
         );
       })}
+      </div>{/* end sliding track */}
 
       {/* Prev / Next Navigation Arrows */}
       {effectiveSlides.length > 1 && (
