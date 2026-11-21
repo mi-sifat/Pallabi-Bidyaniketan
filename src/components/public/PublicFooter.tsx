@@ -180,13 +180,29 @@ export default function PublicFooter({
 
       {/* Bottom bar */}
       <div className="border-t border-white/10 bg-[#162a45]">
-        <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-400">
-          <span>
-            © {new Date().getFullYear()} {displayName}.{" "}
-            {locale === "bn"
-              ? "সর্বস্বত্ব সংরক্ষিত। EIIN: ১০৮৩২৫"
-              : "All rights reserved. EIIN: 108325"}
-          </span>
+        <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-gray-400">
+          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3 text-center sm:text-left">
+            <span>
+              © {new Date().getFullYear()} {displayName}.{" "}
+              {locale === "bn"
+                ? "সর্বস্বত্ব সংরক্ষিত। EIIN: ১০৮৩২৫"
+                : "All rights reserved. EIIN: 108325"}
+            </span>
+            <span className="hidden sm:inline text-gray-600">|</span>
+            <span className="text-gray-300">
+              Developed by{" "}
+              <a
+                href="https://majharul-islam-sifat.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-extrabold text-[#c9a84c] hover:text-amber-300 hover:underline transition-colors inline-flex items-center gap-1"
+                title="Majharul Islam Sifat — Developer Portfolio"
+              >
+                <span>Majharul Islam Sifat</span>
+                <span className="text-[11px]">↗</span>
+              </a>
+            </span>
+          </div>
           <div className="flex items-center gap-4">
             <Link href={`/${locale}/about`} className="hover:text-gray-200 transition-colors">
               {locale === "bn" ? "বিদ্যালয় সম্পর্কে" : "About"}
