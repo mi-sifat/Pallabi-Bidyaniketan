@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 
 interface ImageItem {
@@ -49,13 +50,16 @@ export default function GalleryLightbox({
               onClick={() => openLightbox(idx)}
               className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xs group cursor-pointer hover:shadow-md transition-shadow relative"
             >
-              <div className="relative h-44 w-full bg-gray-100 flex items-center justify-center">
-                <img
+              <div className="relative h-44 w-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                <Image
                   src={img.imageUrl}
                   alt={cap || "Album image"}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  fill
+                  sizes="(max-width: 640px) 50vw, 25vw"
+                  quality={80}
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white z-10">
                   <ZoomIn size={24} />
                 </div>
               </div>

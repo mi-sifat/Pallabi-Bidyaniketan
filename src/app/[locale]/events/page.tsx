@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 import Link from "next/link";
+import Image from "next/image";
 import { Calendar, MapPin, ArrowRight, ImageIcon } from "lucide-react";
+
+export const revalidate = 60;
 
 export default async function PublicEventsPage({
   params,
@@ -38,12 +41,15 @@ export default async function PublicEventsPage({
               <div>
                 {ev.coverImageUrl ? (
                   <div className="relative h-48 overflow-hidden bg-gray-100">
-                    <img
+                    <Image
                       src={ev.coverImageUrl}
                       alt={ev.titleBn || ev.titleEn}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      quality={80}
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <span className="absolute top-3 right-3 bg-[#1e3a5f]/85 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-xs">
+                    <span className="absolute top-3 right-3 bg-[#1e3a5f]/85 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-xs z-10">
                       {ev.category}
                     </span>
                   </div>

@@ -3,6 +3,8 @@ import type { Locale } from "@/lib/i18n";
 import Image from "next/image";
 import { Users, Search, GraduationCap } from "lucide-react";
 
+export const revalidate = 60;
+
 export default async function TeachersPage({
   params,
   searchParams,

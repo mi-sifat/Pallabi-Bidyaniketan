@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ArrowLeft, Image as ImageIcon } from "lucide-react";
 import GalleryLightbox from "@/components/public/GalleryLightbox";
 
+export const revalidate = 60;
+
 export default async function AllPhotosPage({
   params,
 }: {

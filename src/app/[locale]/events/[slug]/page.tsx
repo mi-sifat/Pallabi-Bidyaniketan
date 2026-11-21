@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Calendar, MapPin, ArrowLeft, ImageIcon } from "lucide-react";
 import GalleryLightbox from "@/components/public/GalleryLightbox";
 
@@ -45,11 +46,15 @@ export default async function PublicEventDetailPage({
       {/* Main Card */}
       <article className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
         {event.coverImageUrl && (
-          <div className="relative h-72 sm:h-96 w-full bg-gray-100">
-            <img
+          <div className="relative h-72 sm:h-96 w-full bg-gray-100 overflow-hidden">
+            <Image
               src={event.coverImageUrl}
               alt={title}
-              className="w-full h-full object-cover"
+              fill
+              priority
+              sizes="(max-width: 896px) 100vw, 896px"
+              quality={85}
+              className="object-cover"
             />
           </div>
         )}

@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 import { Building, Award, Target, CheckCircle2, History } from "lucide-react";
 
+export const revalidate = 60;
+
 export default async function AboutPage({
   params,
 }: {

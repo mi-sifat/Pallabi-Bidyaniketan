@@ -3,6 +3,8 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 import HomepageSlider from "@/components/public/HomepageSlider";
+
+export const revalidate = 60;
 import {
   Bell,
   Calendar,
@@ -235,12 +237,15 @@ export default async function HomePage({
                 <div>
                   {ev.coverImageUrl ? (
                     <div className="relative h-44 overflow-hidden bg-gray-100">
-                      <img
+                      <Image
                         src={ev.coverImageUrl}
                         alt={ev.titleBn || ev.titleEn}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        quality={80}
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
-                      <span className="absolute top-3 right-3 bg-[#1e3a5f]/85 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs">
+                      <span className="absolute top-3 right-3 bg-[#1e3a5f]/85 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs z-10">
                         {ev.category}
                       </span>
                     </div>
@@ -327,17 +332,20 @@ export default async function HomePage({
                 >
                   <div className="relative aspect-4/3 bg-gray-100 overflow-hidden">
                     {album.coverImageUrl ? (
-                      <img
+                      <Image
                         src={album.coverImageUrl}
                         alt={album.titleBn || album.titleEn}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        fill
+                        sizes="(max-width: 640px) 50vw, 25vw"
+                        quality={80}
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">
                         <GalleryIcon size={28} />
                       </div>
                     )}
-                    <span className="absolute bottom-2 left-2 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-xs">
+                    <span className="absolute bottom-2 left-2 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-xs z-10">
                       {album.images.length} ছবি
                     </span>
                   </div>
@@ -387,10 +395,13 @@ export default async function HomePage({
                   <div>
                     {item.coverImageUrl && (
                       <div className="relative h-44 overflow-hidden bg-gray-100">
-                        <img
+                        <Image
                           src={item.coverImageUrl}
                           alt={tr?.title || "News"}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          quality={80}
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                     )}
@@ -453,12 +464,15 @@ export default async function HomePage({
                 key={teacher.id}
                 className="bg-white rounded-2xl shadow-2xs border border-gray-200 overflow-hidden text-center p-5 space-y-3 hover:shadow-md transition-shadow"
               >
-                <div className="w-20 h-20 mx-auto rounded-full bg-gray-100 overflow-hidden flex items-center justify-center border-2 border-[#1e3a5f]/20 shadow-xs">
+                <div className="w-20 h-20 mx-auto rounded-full bg-gray-100 overflow-hidden flex items-center justify-center border-2 border-[#1e3a5f]/20 shadow-xs relative">
                   {teacher.photoUrl ? (
-                    <img
+                    <Image
                       src={teacher.photoUrl}
                       alt={teacher.nameEn}
-                      className="object-cover w-full h-full"
+                      fill
+                      sizes="80px"
+                      quality={80}
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[#1e3a5f] font-bold text-sm bg-amber-50">

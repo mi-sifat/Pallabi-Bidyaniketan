@@ -3,6 +3,8 @@ import type { Locale } from "@/lib/i18n";
 import Link from "next/link";
 import { Bell, Calendar, Download, FileText } from "lucide-react";
 
+export const revalidate = 60;
+
 export default async function NoticesPage({
   params,
 }: {

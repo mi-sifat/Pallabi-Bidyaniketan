@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 
@@ -33,7 +34,7 @@ export default function HomepageSlider({
       : [
           {
             id: "default-1",
-            imageUrl: "/school-campus.jpg",
+            imageUrl: "/uploads/facebook/5776d963-54ed-45c4-8513-96c1b503a37e.png",
             titleBn: "পল্লবী বিদ্যানিকেতন — শিক্ষার আলোয় গড়ি ভবিষ্যৎ",
             titleEn: "Pallabi Bidyaniketan — Building Future with Quality Education",
             subtitleBn:
@@ -69,7 +70,7 @@ export default function HomepageSlider({
 
   return (
     <div className="relative w-full h-[400px] sm:h-[480px] md:h-[560px] overflow-hidden bg-slate-900 group">
-      {/* Background Image with smooth transition */}
+      {/* Background Image with smooth transition & Next.js Image Optimization */}
       {effectiveSlides.map((slide, index) => (
         <div
           key={slide.id}
@@ -78,10 +79,14 @@ export default function HomepageSlider({
           }`}
           style={{ transition: "opacity 1000ms ease-in-out, transform 7000ms ease-out" }}
         >
-          <img
+          <Image
             src={slide.imageUrl}
             alt={slide.titleBn || "School banner"}
-            className="w-full h-full object-cover"
+            fill
+            priority={index === 0}
+            sizes="100vw"
+            quality={85}
+            className="object-cover"
           />
           {/* Subtle multi-layer overlay for rich text readability */}
           <div className="absolute inset-0 bg-linear-to-r from-black/85 via-black/50 to-transparent" />

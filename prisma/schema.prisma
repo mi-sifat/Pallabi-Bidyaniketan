@@ -201,6 +201,8 @@ model Teacher {
 
   createdBy         User?     @relation("TeacherCreator", fields: [createdById], references: [id])
 
+  @@index([isPublished, isArchived, displayOrder])
+  @@index([isPublished, isCurrent])
   @@map("teachers")
 }
 
@@ -356,6 +358,8 @@ model Notice {
   translations NoticeTranslation[]
   createdBy    User?     @relation("NoticeCreator", fields: [createdById], references: [id])
 
+  @@index([isPublished, createdAt])
+  @@index([isImportant, isPublished])
   @@map("notices")
 }
 
@@ -399,6 +403,7 @@ model News {
   album        GalleryAlbum? @relation("NewsAlbum", fields: [albumId], references: [id])
   event        SchoolEvent?  @relation("NewsEvent", fields: [eventId], references: [id])
 
+  @@index([isPublished, createdAt])
   @@map("news")
 }
 
@@ -443,6 +448,7 @@ model SchoolEvent {
   album         GalleryAlbum? @relation("EventAlbum", fields: [albumId], references: [id])
   news          News[]        @relation("NewsEvent")
 
+  @@index([isPublished, eventDate])
   @@map("school_events")
 }
 
@@ -474,6 +480,7 @@ model GalleryAlbum {
   news        News[]           @relation("NewsAlbum")
   events      SchoolEvent[]    @relation("EventAlbum")
 
+  @@index([isPublished, createdAt])
   @@map("gallery_albums")
 }
 
@@ -494,6 +501,7 @@ model GalleryImage {
 
   album        GalleryAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
 
+  @@index([albumId, isPublished, sortOrder])
   @@map("gallery_images")
 }
 
@@ -678,6 +686,8 @@ model Media {
 
   uploadedBy   User?    @relation("MediaUploader", fields: [uploadedById], references: [id])
 
+  @@index([category, createdAt])
+  @@index([folder])
   @@map("media")
 }
 
@@ -783,6 +793,7 @@ model HomepageSlide {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  @@index([isActive, sortOrder])
   @@map("homepage_slides")
 }
 
@@ -806,6 +817,7 @@ model AnnouncementPopup {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  @@index([isActive, updatedAt])
   @@map("announcement_popups")
 }
 

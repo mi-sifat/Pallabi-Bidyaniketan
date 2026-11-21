@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Newspaper, Calendar, ArrowRight } from "lucide-react";
 
+export const revalidate = 60;
+
 export default async function NewsPage({
   params,
 }: {

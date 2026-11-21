@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { X, Megaphone, ArrowRight } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 
@@ -74,14 +75,17 @@ export default function AnnouncementPopup({
 
         {/* Image Banner */}
         {popup.imageUrl ? (
-          <div className="relative h-48 w-full bg-gray-100">
-            <img
+          <div className="relative h-48 w-full bg-gray-100 overflow-hidden">
+            <Image
               src={popup.imageUrl}
               alt={title || "Notice"}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 480px) 100vw, 448px"
+              quality={80}
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-3 left-4 inline-flex items-center gap-1.5 bg-[#c9a84c] text-[#1e3a5f] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-xs">
+            <div className="absolute bottom-3 left-4 inline-flex items-center gap-1.5 bg-[#c9a84c] text-[#1e3a5f] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-xs z-10">
               <Megaphone size={12} />
               জরুরি বিজ্ঞপ্তি
             </div>

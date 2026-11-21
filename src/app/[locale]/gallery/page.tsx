@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 import Link from "next/link";
+import Image from "next/image";
 import { Camera, Image as ImageIcon, Grid } from "lucide-react";
+
+export const revalidate = 60;
 
 export default async function GalleryPage({
   params,
@@ -50,18 +53,21 @@ export default async function GalleryPage({
               <div>
                 <div className="h-52 bg-gray-100 relative overflow-hidden flex items-center justify-center">
                   {album.coverImageUrl ? (
-                    <img
+                    <Image
                       src={album.coverImageUrl}
                       alt={album.titleBn || album.titleEn}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      quality={80}
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
                     <Camera size={36} className="text-gray-400" />
                   )}
-                  <span className="absolute top-3 right-3 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs">
+                  <span className="absolute top-3 right-3 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs z-10">
                     {album.images.length} {locale === "bn" ? "টি ছবি" : "photos"}
                   </span>
-                  <span className="absolute bottom-3 left-3 bg-[#1e3a5f]/85 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-xs">
+                  <span className="absolute bottom-3 left-3 bg-[#1e3a5f]/85 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-xs z-10">
                     {album.category || "Events"}
                   </span>
                 </div>
