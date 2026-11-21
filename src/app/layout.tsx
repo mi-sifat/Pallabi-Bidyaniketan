@@ -1,19 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_Bengali, Inter } from "next/font/google";
 import "./globals.css";
-
-const notoBengali = Noto_Sans_Bengali({
-  subsets: ["bengali"],
-  variable: "--font-bengali",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -46,9 +32,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="bn" suppressHydrationWarning>
-      <body
-        className={`${notoBengali.variable} ${inter.variable} font-bengali antialiased bg-gray-50 text-gray-900`}
-      >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="font-bengali antialiased bg-gray-50 text-gray-900">
         {children}
       </body>
     </html>
