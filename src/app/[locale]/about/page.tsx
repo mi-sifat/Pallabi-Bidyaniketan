@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 import { Building, Award, Target, CheckCircle2, History } from "lucide-react";

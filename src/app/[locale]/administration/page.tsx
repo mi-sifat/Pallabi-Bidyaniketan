@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 import { Building2, ShieldCheck, Users } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdministrationPage({
   params,
 }: {

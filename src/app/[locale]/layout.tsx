@@ -5,9 +5,7 @@ import PublicFooter from "@/components/public/PublicFooter";
 import AnnouncementPopup from "@/components/public/AnnouncementPopup";
 import { prisma } from "@/lib/prisma";
 
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function LocaleLayout({
   children,
@@ -22,13 +20,22 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const [profile, activePopup] = await Promise.all([
-    prisma.schoolProfile.findFirst(),
-    prisma.announcementPopup.findFirst({
-      where: { isActive: true },
-      orderBy: { updatedAt: "desc" },
-    }),
-  ]);
+  let profile = null;
+  let activePopup = null;
+
+  try {
+    if (prisma) {
+      [profile, activePopup] = await Promise.all([
+        prisma.schoolProfile.findFirst(),
+        prisma.announcementPopup.findFirst({
+          where: { isActive: true },
+          orderBy: { updatedAt: "desc" },
+        }),
+      ]);
+    }
+  } catch {
+    // DB not available (build-time or missing DATABASE_URL)
+  }
 
   const schoolName =
     locale === "bn"

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 import { Users, GraduationCap, HeartHandshake } from "lucide-react";

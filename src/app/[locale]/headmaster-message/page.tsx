@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { Building, GraduationCap, Users, Phone, Mail, MapPin, ArrowRight, BookOpen, Quote } from "lucide-react";

@@ -1,11 +1,10 @@
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 import HomepageSlider from "@/components/public/HomepageSlider";
 import NoticeTicker from "@/components/public/NoticeTicker";
-
-export const revalidate = 60;
 import {
   Bell,
   Calendar,
