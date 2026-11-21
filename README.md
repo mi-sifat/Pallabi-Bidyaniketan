@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# পল্লবী বিদ্যানিকেতন - প্রাতিষ্ঠানিক ওয়েবসাইট ও অ্যাডমিন সিএমএস
+## Pallabi Bidyaniketan, Mirpur-7, Pallabi, Dhaka-1216 | EIIN: 108325
 
-## Getting Started
+একটি আধুনিক, দ্বিভাষিক (বাংলা ও ইংরেজি), পূর্ণাঙ্গ প্রাতিষ্ঠানিক স্কুল ওয়েবসাইট এবং ডায়নামিক অ্যাডমিন কনটেন্ট ম্যানেজমেন্ট সিস্টেম (CMS)।
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🌟 মূল বৈশিষ্ট্যসমূহ (Key Features)
+
+### ১. পাবলিক ওয়েবসাইট (Bilingual Public Website)
+- **দ্বিভাষিক সমর্থন:** সম্পূর্ণ বাংলা (ডিফল্ট) এবং ইংরেজি ইন্টারফেস (`/bn` ও `/en`)।
+- **হোমপেজ:** আধুনিক প্রাতিষ্ঠানিক ব্যানার, জরুরি নোটিশ স্ক্রলার, প্রধান শিক্ষকের বাণী, মূল পরিসংখ্যান (EIIN: 108325, প্রতিষ্ঠার সাল), অনুষদ পরিচিতি এবং গুগল ম্যাপসহ সরাসরি ক্যাম্পাস লোকেশন।
+- **প্রতিষ্ঠান পরিচিতি ও ইতিহাস:** প্রাতিষ্ঠানিক বিবরণ, ভিশন, মিশন ও লক্ষ্য।
+- **শিক্ষকমণ্ডলী ডিরেক্টরি:** ঢাকা শিক্ষা বোর্ড পোর্টাল থেকে প্রাপ্ত শিক্ষক তালিকা ও সার্চ ফিল্টার।
+- **নোটিশ বোর্ড:** ক্যাটাগরিভিত্তিক নোটিশ ও পিডিএফ ডাউনলোড সুবিধা।
+- **ভর্তি নির্দেশিকা:** ভর্তি যোগ্যতা, প্রয়োজনীয় নথিপত্র এবং হেল্পডেস্ক তথ্য।
+- **ফলাফল আর্কাইভ:** এসএসসি ও বার্ষিক পরীক্ষার অফিসিয়াল ফলাফল আর্কাইভ।
+- **ডাউনলোড ও ফরম:** ভর্তি ফরম, সিলেবাস এবং পরীক্ষার রুটিন সংগ্রহের সহজ মাধ্যম।
+- **অনলাইন যোগাযোগ ফর্ম:** সার্ভার-সাইড ভ্যালিডেশন এবং রেট-লিমিটিংযুক্ত ইনকোয়ারি ফর্ম।
+
+### ২. অ্যাডমিন সিএমএস ও ব্যাকএন্ড (Admin CMS & Backend)
+- **নিরাপদ প্রমাণীকরণ:** নেক্সট-অথ (NextAuth) ও রোল-বেসড এক্সেস কন্ট্রোল (RBAC)।
+- **কন্টেন্ট ভেরিফিকেশন ড্যাশবোর্ড (`/admin/verification`):** সরকারি ও ঐতিহাসিক উৎস থেকে সংগৃহীত প্রাথমিক তথ্যাদি (যেমন: ২০ জন শিক্ষকের তথ্য, প্রতিষ্ঠার সাল) একক ক্লিকের মাধ্যমে অনুমোদন ও প্রকাশের সুবিধা।
+- **মাইগ্রেশন ও সোর্স রিভিউ (`/admin/migration`):** ঢাকা শিক্ষা বোর্ড পোর্টাল ও পূর্ববর্তী ওয়েব সোর্স থেকে সংগৃহীত তথ্যাবলীর পরিপূর্ণ অডিট ট্রেইল।
+- **শিক্ষক ব্যবস্থাপনা:** প্রতিটি শিক্ষকের পদবী ও স্ট্যাটাস টগল (Publish / Unpublish / Edit)।
+- **নোটিশ পাবলিশার:** একক ক্লিকে জরুরি নোটিশ তৈরি ও ওয়েবসাইট শীর্ষ ব্যালুনে হাইলাইট।
+- **স্কুল প্রোফাইল সেটিংস:** প্রতিষ্ঠানের নাম (বাংলা/ইংরেজি), মোবাইল, ঠিকানা ও অফিসিয়াল ফেসবুক পেজ পরিবর্তনের প্যানেল।
+- **যোগাযোগ বার্তা ইনবক্স:** ওয়েবসাইটের মাধ্যমে প্রাপ্ত অভিভাবকদের বার্তা পর্যবেক্ষণ ও মার্ক করার সুবিধা।
+
+---
+
+## 🛠️ প্রযুক্তিগত স্থাপত্য (Tech Stack)
+
+- **Frontend & Framework:** Next.js 15 (App Router) + React 19 + TypeScript
+- **Styling:** Tailwind CSS (Navy Blue `#1e3a5f`, Academic Gold `#c9a84c`)
+- **Database & ORM:** Prisma ORM with SQLite (`dev.db` for local development) & PostgreSQL production support
+- **Authentication:** NextAuth.js (Session JWT, secure bcrypt password hashing)
+- **Validation:** Server Actions & Zod schema checks
+- **Media Storage:** Local upload directory (`public/uploads/`) with Cloudflare R2 / AWS S3 ready structure
+
+---
+
+## 🚀 লোকাল ডেভেলপমেন্ট সেটআপ (Local Setup)
+
+### ১. প্যাকেজ ইনস্টলেশন
+```powershell
+cd "pallabi-school"
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### ২. এনভায়রনমেন্ট কনফিগারেশন (`.env`)
+প্রকল্পের রুটে `.env` ফাইল স্বয়ংক্রিয়ভাবে প্রস্তুত রয়েছে:
+```env
+DATABASE_URL="file:./dev.db"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="pallabi-school-secret-dev-2024-jwt-key"
+SUPER_ADMIN_EMAIL="admin@pallabibidyaniketan.edu.bd"
+SUPER_ADMIN_PASSWORD="Admin@PBN2024!"
+SUPER_ADMIN_NAME="System Administrator"
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### ৩. ডাটাবেজ তৈরি ও সিডিং
+```powershell
+npx prisma generate
+npx prisma db push
+npx tsx prisma/seed.ts
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### ৪. ডেভেলপমেন্ট সার্ভার চালু
+```powershell
+npm run dev
+```
+ব্রাউজারে ওপেন করুন: `http://localhost:3000`
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🔐 অ্যাডমিন লগইন তথ্য (Admin Login Credentials)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **অ্যাডমিন ইউআরএল:** `http://localhost:3000/admin/login`
+- **ইমেইল:** `admin@pallabibidyaniketan.edu.bd`
+- **পাসওয়ার্ড:** `Admin@PBN2024!`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📋 কনটেন্ট ভেরিফিকেশন ও তথ্য অনুমোদনের নিয়মাবলী
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. ওয়েবসাইটে প্রাথমিক শিক্ষক ও ঐতিহাসিক তথ্যসমূহ **PENDING_VERIFICATION** অবস্থায় ডাটাবেজে যুক্ত থাকে।
+2. স্কুল প্রধান বা অনুমোদিত অ্যাডমিন `/admin/verification` পেজে গিয়ে যেকোনো শিক্ষক বা তথ্যের পাশে থাকা **"অনুমোদন ও প্রকাশ"** বাটনে ক্লিক করলে তা সরাসরি ওয়েবসাইটে দৃশ্যমান হবে।
+3. প্রয়োজনবোধে **"সকল শিক্ষক অনুমোদন ও প্রকাশ করুন"** বাটনে ক্লিক করে এক ক্লিকেই সম্পূর্ণ শিক্ষক তালিকা ওয়েবসাইটে লাইভ করা যাবে।
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🖼️ লোগো ও ছবি প্রতিস্থাপনের নিয়ম
+
+- বিদ্যালয়ের মূল লোগো স্বয়ংক্রিয়ভাবে `public/uploads/branding/logo.jpg`-তে যুক্ত করা হয়েছে।
+- লোগো বা ব্যানার পরিবর্তন করতে `/admin/settings` প্যানেল ব্যবহার করুন অথবা সরাসরি `public/uploads/branding/` ফোল্ডারে নতুন ফাইল প্রতিস্থাপন করুন।
+
+---
+
+## 🌐 প্রোডাকশন ডিপ্লয়মেন্ট (Production Deployment)
+
+### Vercel / Cloud Server এ ডেপ্লয়মেন্ট:
+1. ডাটাবেজ ইউআরএল PostgreSQL এ পরিবর্তন করুন:
+   ```env
+   DATABASE_URL="postgresql://user:password@host:5432/pallabi_school"
+   ```
+2. বিল্ড রান করুন:
+   ```powershell
+   npm run build
+   npm run start
+   ```
