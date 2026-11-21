@@ -70,7 +70,7 @@ export default async function HeadmasterMessagePage({
         <div className="p-6 sm:p-10 lg:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Headmaster Profile Sidebar */}
           <div className="lg:col-span-4 bg-gray-50 rounded-2xl border border-gray-200 p-6 text-center space-y-4">
-            <div className="w-36 h-36 mx-auto rounded-2xl overflow-hidden border-4 border-[#1e3a5f]/20 shadow-md relative bg-white">
+            <div className="w-44 h-56 mx-auto rounded-2xl overflow-hidden border-4 border-[#1e3a5f]/20 shadow-md relative bg-white">
               <Image
                 src={photoUrl}
                 alt={name}

@@ -43,8 +43,12 @@ export default function PublicFooter({
           {/* 1. School Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#c9a84c] text-[#1e3a5f] font-black flex items-center justify-center text-lg shadow-md shrink-0">
-                পব
+              <div className="w-12 h-12 rounded-xl bg-white p-1 border border-white/20 shadow-md shrink-0 relative overflow-hidden flex items-center justify-center">
+                <img
+                  src="/uploads/branding/logo.jpg"
+                  alt={displayName}
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
                 <h3 className="font-extrabold text-base text-white tracking-wide leading-snug">

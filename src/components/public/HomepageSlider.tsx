@@ -31,7 +31,6 @@ export default function HomepageSlider({
   const [isPlaying, setIsPlaying] = useState(true);
   const touchStartX = useRef<number | null>(null);
 
-  // Fallback default slides if none in database
   const effectiveSlides: SlideData[] =
     slides && slides.length > 0
       ? slides
@@ -97,7 +96,7 @@ export default function HomepageSlider({
       onTouchEnd={handleTouchEnd}
       className="relative w-full h-[420px] sm:h-[480px] md:h-[540px] lg:h-[580px] overflow-hidden bg-slate-950 group select-none"
     >
-      {/* Slides Container - absolute positioning per slide for seamless infinite forward/backward transition */}
+      {/* Slides Container */}
       <div className="relative w-full h-full overflow-hidden">
         {effectiveSlides.map((slide, index) => {
           const isCurrent = index === currentIdx;
@@ -115,7 +114,6 @@ export default function HomepageSlider({
               ? slide.buttonTextBn || slide.buttonTextEn
               : slide.buttonTextEn || slide.buttonTextBn;
 
-          // Determine slide positioning for smooth continuous motion
           let transformClass = "translate-x-full opacity-0 pointer-events-none";
           if (isCurrent) {
             transformClass = "translate-x-0 opacity-100 z-10 pointer-events-auto";
@@ -137,19 +135,44 @@ export default function HomepageSlider({
               aria-hidden={!isCurrent}
               className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out ${transformClass}`}
             >
-              {/* Background Image */}
-              <Image
-                src={slide.imageUrl}
-                alt={title || "School banner"}
-                fill
-                priority={index === 0}
-                sizes="100vw"
-                quality={85}
-                className="object-cover w-full h-full"
-              />
+              {/* Background Image Layer (z-0) */}
+              <div className="absolute inset-0 z-0">
+                <Image
+                  src={slide.imageUrl}
+                  alt={title || "School banner"}
+                  fill
+                  priority={index === 0}
+                  sizes="100vw"
+                  quality={85}
+                  className="object-cover w-full h-full"
+                />
 
-              {/* Per-slide Content Overlay */}
-              <div className="relative z-20 container mx-auto px-4 sm:px-6 h-full flex flex-col justify-center max-w-6xl">
+                {/* Shading/Gradient Layer positioned directly over the image, behind text (z-1) */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(to right, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.60) 45%, rgba(15,23,42,0.25) 100%)",
+                  }}
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(to top, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.20) 40%, transparent 100%)",
+                  }}
+                />
+                <div
+                  className="absolute inset-x-0 top-0 h-24"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, rgba(0,0,0,0.40) 0%, transparent 100%)",
+                  }}
+                />
+              </div>
+
+              {/* Text & Button Layer — High z-index (z-30) so never obscured by shadow */}
+              <div className="relative z-30 container mx-auto px-4 sm:px-6 h-full flex flex-col justify-center max-w-6xl">
                 <div className="max-w-2xl space-y-3 sm:space-y-4 text-left">
                   {/* Institutional Badge */}
                   <div className="inline-flex items-center gap-2 bg-[#c9a84c] text-[#1e3a5f] text-[10px] sm:text-xs font-black px-3.5 py-1 rounded-full shadow-md uppercase tracking-wider">
@@ -159,13 +182,13 @@ export default function HomepageSlider({
                   </div>
 
                   {/* Main Heading */}
-                  <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight sm:leading-snug drop-shadow-md">
+                  <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight sm:leading-snug drop-shadow-lg">
                     {title}
                   </h1>
 
                   {/* Subtitle / Description */}
                   {subtitle && (
-                    <p className="text-xs sm:text-sm md:text-base text-gray-100 leading-relaxed max-w-xl drop-shadow line-clamp-2 sm:line-clamp-3">
+                    <p className="text-xs sm:text-sm md:text-base text-gray-100 leading-relaxed max-w-xl drop-shadow-md line-clamp-2 sm:line-clamp-3">
                       {subtitle}
                     </p>
                   )}
@@ -175,7 +198,7 @@ export default function HomepageSlider({
                     <div className="pt-2 sm:pt-4">
                       <Link
                         href={slide.buttonUrl}
-                        className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-[#c9a84c] hover:bg-amber-400 text-[#1e3a5f] font-extrabold text-xs sm:text-sm rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#c9a84c] hover:bg-amber-400 text-[#1e3a5f] font-extrabold text-xs sm:text-sm rounded-xl shadow-xl transition-all hover:scale-105 active:scale-95 cursor-pointer border border-amber-300"
                       >
                         <span>{buttonText}</span>
                         <ArrowRight size={16} />
@@ -189,36 +212,13 @@ export default function HomepageSlider({
         })}
       </div>
 
-      {/* Container-level Persistent Shadow & Gradient Overlays — eliminates any side gaps or flicker */}
-      <div
-        className="absolute inset-0 pointer-events-none z-15"
-        style={{
-          background:
-            "linear-gradient(to right, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.65) 45%, rgba(15,23,42,0.20) 100%)",
-        }}
-      />
-      <div
-        className="absolute inset-0 pointer-events-none z-15"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 60%)",
-        }}
-      />
-      <div
-        className="absolute inset-x-0 top-0 h-24 pointer-events-none z-15"
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)",
-        }}
-      />
-
-      {/* Prev / Next Navigation Arrows */}
+      {/* Prev / Next Navigation Arrows (z-40) */}
       {effectiveSlides.length > 1 && (
         <>
           <button
             type="button"
             onClick={prevSlide}
-            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/45 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all cursor-pointer opacity-80 group-hover:opacity-100 hover:scale-110 shadow-lg border border-white/20"
+            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-40 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/50 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-sm transition-all cursor-pointer opacity-90 group-hover:opacity-100 hover:scale-110 shadow-xl border border-white/30"
             aria-label="Previous Slide"
           >
             <ChevronLeft size={24} />
@@ -226,14 +226,14 @@ export default function HomepageSlider({
           <button
             type="button"
             onClick={nextSlide}
-            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/45 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all cursor-pointer opacity-80 group-hover:opacity-100 hover:scale-110 shadow-lg border border-white/20"
+            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-40 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/50 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-sm transition-all cursor-pointer opacity-90 group-hover:opacity-100 hover:scale-110 shadow-xl border border-white/30"
             aria-label="Next Slide"
           >
             <ChevronRight size={24} />
           </button>
 
-          {/* Bottom Bar: Indicators & Play/Pause */}
-          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 bg-black/40 backdrop-blur-sm px-3.5 py-1.5 rounded-full border border-white/15 shadow-md">
+          {/* Bottom Bar: Indicators & Play/Pause (z-40) */}
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 shadow-xl">
             {effectiveSlides.map((_, idx) => (
               <button
                 key={idx}
@@ -248,16 +248,16 @@ export default function HomepageSlider({
               />
             ))}
 
-            <span className="w-[1px] h-3 bg-white/20 mx-1" />
+            <span className="w-[1px] h-3 bg-white/30 mx-1" />
 
             <button
               type="button"
               onClick={() => setIsPlaying(!isPlaying)}
-              className="text-white/70 hover:text-white transition-colors cursor-pointer p-0.5"
+              className="text-white/80 hover:text-white transition-colors cursor-pointer p-0.5"
               aria-label={isPlaying ? "Pause autoplay" : "Start autoplay"}
               title={isPlaying ? "অটো-প্লে বন্ধ করুন" : "অটো-প্লে চালু করুন"}
             >
-              {isPlaying ? <Pause size={13} /> : <Play size={13} />}
+              {isPlaying ? <Pause size={14} /> : <Play size={14} />}
             </button>
           </div>
         </>

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 import HomepageSlider from "@/components/public/HomepageSlider";
+import NoticeTicker from "@/components/public/NoticeTicker";
 
 export const revalidate = 60;
 import {
@@ -86,36 +87,7 @@ export default async function HomePage({
 
       {/* 2. Notice Scroller / Urgent Notice Ticker */}
       <section className="container mx-auto px-4 -mt-8 relative z-30">
-        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-4 flex flex-col md:flex-row items-stretch md:items-center gap-4">
-          <div className="flex items-center gap-2 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shrink-0 w-fit">
-            <Bell size={14} className="animate-pulse" />
-            {locale === "bn" ? "জরুরি ঘোষণা" : "Announcements"}
-          </div>
-          <div className="flex-1 overflow-hidden">
-            {notices.length > 0 ? (
-              <div className="flex items-center gap-4 text-sm font-medium text-gray-800">
-                <span className="text-[#1e3a5f] font-semibold truncate">
-                  {notices[0].translations.find((t) => t.locale === locale)?.title ||
-                    notices[0].translations[0]?.title ||
-                    "বিদ্যালয়ের সকল কার্যক্রম নিয়মিত সময়সূচি অনুযায়ী চলছে।"}
-                </span>
-              </div>
-            ) : (
-              <p className="text-xs text-gray-500 italic">
-                {locale === "bn"
-                  ? "নতুন কোনো জরুরি বিজ্ঞপ্তি প্রকাশিত হয়নি।"
-                  : "No new emergency notices published."}
-              </p>
-            )}
-          </div>
-          <Link
-            href={`/${locale}/notices`}
-            className="text-xs font-bold text-[#1e3a5f] hover:text-[#c9a84c] shrink-0 inline-flex items-center gap-1"
-          >
-            {locale === "bn" ? "সকল নোটিশ দেখুন" : "All Notices"}
-            <ArrowRight size={14} />
-          </Link>
-        </div>
+        <NoticeTicker notices={notices} locale={locale} />
       </section>
 
       {/* 3. Welcome / School Intro & Headmaster's Message */}
@@ -172,13 +144,13 @@ export default async function HomePage({
               </h3>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="w-16 h-16 rounded-full bg-amber-50 overflow-hidden border-2 border-[#1e3a5f]/30 shrink-0 shadow-xs relative">
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-24 rounded-2xl bg-amber-50 overflow-hidden border-2 border-[#1e3a5f]/30 shrink-0 shadow-sm relative">
                 <Image
                   src="/uploads/teachers/MD_SHAHE_ALAM.jpg"
                   alt={locale === "bn" ? "মোঃ শাহে আলম" : "MD. SHAHE ALAM"}
                   fill
-                  sizes="64px"
+                  sizes="80px"
                   className="object-cover"
                 />
               </div>
@@ -189,7 +161,7 @@ export default async function HomePage({
                 <p className="text-xs text-gray-500 font-medium">
                   {locale === "bn" ? "প্রধান শিক্ষক" : "Headmaster"}
                 </p>
-                <span className="text-[10px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full font-bold inline-block mt-0.5 border border-emerald-200">
+                <span className="text-[10px] text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full font-bold inline-block mt-1 border border-emerald-200">
                   {locale === "bn" ? "পল্লবী বিদ্যানিকেতন" : "Pallabi Bidyaniketan"}
                 </span>
               </div>
@@ -468,16 +440,16 @@ export default async function HomePage({
             {featuredTeachers.map((teacher) => (
               <div
                 key={teacher.id}
-                className="bg-white rounded-2xl shadow-2xs border border-gray-200 overflow-hidden text-center p-5 space-y-3 hover:shadow-md transition-shadow"
+                className="bg-white rounded-2xl shadow-2xs border border-gray-200 overflow-hidden text-center p-4 space-y-3 hover:shadow-md transition-shadow group"
               >
-                <div className="w-20 h-20 mx-auto rounded-full bg-gray-100 overflow-hidden flex items-center justify-center border-2 border-[#1e3a5f]/20 shadow-xs relative">
+                <div className="w-28 h-36 mx-auto rounded-xl bg-gray-100 overflow-hidden flex items-center justify-center border-2 border-[#1e3a5f]/20 shadow-xs relative group-hover:border-[#c9a84c] transition-colors">
                   {teacher.photoUrl ? (
                     <Image
                       src={teacher.photoUrl}
                       alt={teacher.nameEn}
                       fill
-                      sizes="80px"
-                      quality={80}
+                      sizes="112px"
+                      quality={85}
                       className="object-cover"
                     />
                   ) : (
@@ -487,7 +459,7 @@ export default async function HomePage({
                   )}
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-900 text-xs sm:text-sm">
+                  <h4 className="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-[#1e3a5f] transition-colors">
                     {locale === "bn" ? teacher.nameBn || teacher.nameEn : teacher.nameEn}
                   </h4>
                   <p className="text-[11px] text-gray-500 font-medium">

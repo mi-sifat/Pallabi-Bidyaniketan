@@ -71,18 +71,18 @@ export default async function TeachersPage({
             className="bg-white rounded-xl shadow-xs border border-gray-200 p-5 text-center flex flex-col items-center justify-between hover:shadow-md transition-shadow group"
           >
             <div className="space-y-3 w-full">
-              <div className="w-24 h-24 mx-auto rounded-full bg-gray-100 border-2 border-[#1e3a5f]/20 overflow-hidden flex items-center justify-center relative shadow-xs group-hover:border-[#c9a84c] transition-colors">
+              <div className="w-36 h-48 mx-auto rounded-2xl bg-gray-100 border-2 border-[#1e3a5f]/20 overflow-hidden flex items-center justify-center relative shadow-sm group-hover:border-[#c9a84c] transition-all">
                 {teacher.photoUrl ? (
                   <Image
                     src={teacher.photoUrl}
                     alt={teacher.nameEn}
-                    width={96}
-                    height={96}
+                    fill
+                    sizes="144px"
                     className="object-cover w-full h-full"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-slate-50 text-[#1e3a5f]">
-                    <Users size={36} className="text-gray-400" />
+                    <Users size={44} className="text-gray-400" />
                   </div>
                 )}
               </div>

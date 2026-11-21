@@ -326,7 +326,7 @@ export default function TeacherManager({
                     </div>
                   </td>
                   <td className="p-3.5">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
+                    <div className="w-11 h-14 rounded-lg overflow-hidden bg-gray-100 border border-gray-300 shrink-0 shadow-xs">
                       {t.photoUrl ? (
                         <img
                           src={t.photoUrl}
