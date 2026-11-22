@@ -28,55 +28,70 @@ export default async function HomePage({
 }) {
   const { locale } = (await params) as { locale: Locale };
 
-  // Fetch published data from DB
-  const [
-    profile,
-    slides,
-    notices,
-    newsList,
-    events,
-    featuredTeachers,
-    recentAlbums,
-    headTeacher,
-  ] = await Promise.all([
-    prisma.schoolProfile.findFirst(),
-    prisma.homepageSlide.findMany({
-      where: { isActive: true },
-      orderBy: { sortOrder: "asc" },
-    }),
-    prisma.notice.findMany({
-      where: { isPublished: true },
-      include: { translations: true },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-    }),
-    prisma.news.findMany({
-      where: { isPublished: true },
-      include: { translations: true },
-      orderBy: { createdAt: "desc" },
-      take: 3,
-    }),
-    prisma.schoolEvent.findMany({
-      where: { isPublished: true },
-      include: { album: true },
-      orderBy: { eventDate: "desc" },
-      take: 3,
-    }),
-    prisma.teacher.findMany({
-      where: { isPublished: true, isArchived: false },
-      orderBy: { displayOrder: "asc" },
-      take: 4,
-    }),
-    prisma.galleryAlbum.findMany({
-      where: { isPublished: true },
-      include: { images: true },
-      orderBy: { createdAt: "desc" },
-      take: 4,
-    }),
-    prisma.adminProfile.findFirst({
-      where: { profileType: "HEAD_TEACHER", isPublished: true },
-    }),
-  ]);
+  // Fetch published data from DB with bulletproof error handling
+  let profile: any = null;
+  let slides: any[] = [];
+  let notices: any[] = [];
+  let newsList: any[] = [];
+  let events: any[] = [];
+  let featuredTeachers: any[] = [];
+  let recentAlbums: any[] = [];
+  let headTeacher: any = null;
+
+  try {
+    if (prisma) {
+      [
+        profile,
+        slides,
+        notices,
+        newsList,
+        events,
+        featuredTeachers,
+        recentAlbums,
+        headTeacher,
+      ] = await Promise.all([
+        prisma.schoolProfile.findFirst().catch(() => null),
+        prisma.homepageSlide.findMany({
+          where: { isActive: true },
+          orderBy: { sortOrder: "asc" },
+        }).catch(() => []),
+        prisma.notice.findMany({
+          where: { isPublished: true },
+          include: { translations: true },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        }).catch(() => []),
+        prisma.news.findMany({
+          where: { isPublished: true },
+          include: { translations: true },
+          orderBy: { createdAt: "desc" },
+          take: 3,
+        }).catch(() => []),
+        prisma.schoolEvent.findMany({
+          where: { isPublished: true },
+          include: { album: true },
+          orderBy: { eventDate: "desc" },
+          take: 3,
+        }).catch(() => []),
+        prisma.teacher.findMany({
+          where: { isPublished: true, isArchived: false },
+          orderBy: { displayOrder: "asc" },
+          take: 4,
+        }).catch(() => []),
+        prisma.galleryAlbum.findMany({
+          where: { isPublished: true },
+          include: { images: true },
+          orderBy: { createdAt: "desc" },
+          take: 4,
+        }).catch(() => []),
+        prisma.adminProfile.findFirst({
+          where: { profileType: "HEAD_TEACHER", isPublished: true },
+        }).catch(() => null),
+      ]);
+    }
+  } catch (err) {
+    console.error("HomePage data fetch error:", err);
+  }
 
   const schoolName =
     locale === "bn"
@@ -370,8 +385,8 @@ export default async function HomePage({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {newsList.map((item) => {
-              const tr = item.translations.find((t) => t.locale === locale) || item.translations[0];
+            {newsList.map((item: any) => {
+              const tr = item.translations?.find((t: any) => t.locale === locale) || item.translations?.[0];
               return (
                 <div
                   key={item.id}

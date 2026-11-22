@@ -4,6 +4,7 @@ import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import AnnouncementPopup from "@/components/public/AnnouncementPopup";
 import { prisma } from "@/lib/prisma";
+import { ensureDatabaseSchema } from "@/lib/auto-db-sync";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,9 @@ export default async function LocaleLayout({
   if (!locales.includes(locale as Locale)) {
     notFound();
   }
+
+  // Safely trigger non-blocking schema check if on Postgres
+  ensureDatabaseSchema().catch(() => {});
 
   let profile = null;
   let activePopup = null;

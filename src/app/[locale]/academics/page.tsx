@@ -16,22 +16,32 @@ export default async function AcademicsPage({
 }) {
   const { locale } = (await params) as { locale: Locale };
 
-  // Fetch dynamic classes, routines, and syllabi from database
-  const [classes, routines, syllabi] = await Promise.all([
-    prisma.academicClass.findMany({
-      where: { isActive: true },
-      include: { subjects: { where: { isActive: true } } },
-      orderBy: { sortOrder: "asc" },
-    }),
-    prisma.routine.findMany({
-      where: { isPublished: true },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.syllabus.findMany({
-      where: { isPublished: true },
-      orderBy: { createdAt: "desc" },
-    }),
-  ]);
+  // Fetch dynamic classes, routines, and syllabi from database safely
+  let classes: any[] = [];
+  let routines: any[] = [];
+  let syllabi: any[] = [];
+
+  try {
+    if (prisma) {
+      [classes, routines, syllabi] = await Promise.all([
+        prisma.academicClass.findMany({
+          where: { isActive: true },
+          include: { subjects: { where: { isActive: true } } },
+          orderBy: { sortOrder: "asc" },
+        }).catch(() => []),
+        prisma.routine.findMany({
+          where: { isPublished: true },
+          orderBy: { createdAt: "desc" },
+        }).catch(() => []),
+        prisma.syllabus.findMany({
+          where: { isPublished: true },
+          orderBy: { createdAt: "desc" },
+        }).catch(() => []),
+      ]);
+    }
+  } catch (err) {
+    console.error("AcademicsPage data fetch error:", err);
+  }
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl space-y-12 print:p-0 print:m-0 print:max-w-none print:space-y-0">

@@ -13,22 +13,32 @@ export default async function AdministrationPage({
 }) {
   const { locale } = (await params) as { locale: Locale };
 
-  // Fetch leadership and committee profiles from single source of truth
-  const [headTeacher, asstHeadTeacher, committeeMembers] = await Promise.all([
-    prisma.adminProfile.findFirst({
-      where: { profileType: "HEAD_TEACHER" },
-    }),
-    prisma.adminProfile.findFirst({
-      where: { profileType: "ASSISTANT_HEAD" },
-    }),
-    prisma.adminProfile.findMany({
-      where: {
-        profileType: { notIn: ["HEAD_TEACHER", "ASSISTANT_HEAD"] },
-        isPublished: true,
-      },
-      orderBy: { displayOrder: "asc" },
-    }),
-  ]);
+  // Fetch leadership and committee profiles from single source of truth safely
+  let headTeacher: any = null;
+  let asstHeadTeacher: any = null;
+  let committeeMembers: any[] = [];
+
+  try {
+    if (prisma) {
+      [headTeacher, asstHeadTeacher, committeeMembers] = await Promise.all([
+        prisma.adminProfile.findFirst({
+          where: { profileType: "HEAD_TEACHER" },
+        }).catch(() => null),
+        prisma.adminProfile.findFirst({
+          where: { profileType: "ASSISTANT_HEAD" },
+        }).catch(() => null),
+        prisma.adminProfile.findMany({
+          where: {
+            profileType: { notIn: ["HEAD_TEACHER", "ASSISTANT_HEAD"] },
+            isPublished: true,
+          },
+          orderBy: { displayOrder: "asc" },
+        }).catch(() => []),
+      ]);
+    }
+  } catch (err) {
+    console.error("AdministrationPage data fetch error:", err);
+  }
 
   // Fallback data if not yet created in DB
   const headName = locale === "bn" ? headTeacher?.nameBn || "মোঃ শাহে আলম" : headTeacher?.nameEn || "MD. SHAHE ALAM";

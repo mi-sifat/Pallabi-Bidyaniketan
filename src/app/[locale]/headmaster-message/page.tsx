@@ -14,23 +14,31 @@ export default async function HeadmasterMessagePage({
 }) {
   const { locale } = (await params) as { locale: Locale };
 
-  // Fetch headmaster record from centralized AdminProfile
-  const headProfile = await prisma.adminProfile.findFirst({
-    where: { profileType: "HEAD_TEACHER" },
-  });
+  // Fetch headmaster record from centralized AdminProfile safely
+  let headProfile: any = null;
+  let teacherHead: any = null;
 
-  // Fallback to teacher table if not in adminProfile
-  const teacherHead = !headProfile
-    ? await prisma.teacher.findFirst({
-        where: {
-          OR: [
-            { designationEn: { contains: "Headmaster" } },
-            { designationBn: { contains: "প্রধান শিক্ষক" } },
-            { nameEn: { contains: "SHAHE ALAM" } },
-          ],
-        },
-      })
-    : null;
+  try {
+    if (prisma) {
+      headProfile = await prisma.adminProfile.findFirst({
+        where: { profileType: "HEAD_TEACHER" },
+      }).catch(() => null);
+
+      if (!headProfile) {
+        teacherHead = await prisma.teacher.findFirst({
+          where: {
+            OR: [
+              { designationEn: { contains: "Headmaster" } },
+              { designationBn: { contains: "প্রধান শিক্ষক" } },
+              { nameEn: { contains: "SHAHE ALAM" } },
+            ],
+          },
+        }).catch(() => null);
+      }
+    }
+  } catch (err) {
+    console.error("HeadmasterMessagePage data fetch error:", err);
+  }
 
   const photoUrl = headProfile?.photoUrl || teacherHead?.photoUrl || "/uploads/teachers/MD_SHAHE_ALAM.jpg";
   const name =

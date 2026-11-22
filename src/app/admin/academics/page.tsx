@@ -8,22 +8,32 @@ import AcademicManager, {
 export const dynamic = "force-dynamic";
 
 export default async function AdminAcademicsPage() {
-  const [classes, routines, syllabi] = await Promise.all([
-    prisma.academicClass.findMany({
-      include: {
-        subjects: { where: { isActive: true }, orderBy: { sortOrder: "asc" } },
-        routines: true,
-      },
-      orderBy: { sortOrder: "asc" },
-    }),
-    prisma.routine.findMany({
-      include: { class: true },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.syllabus.findMany({
-      orderBy: { createdAt: "desc" },
-    }),
-  ]);
+  let classes: any[] = [];
+  let routines: any[] = [];
+  let syllabi: any[] = [];
+
+  try {
+    if (prisma) {
+      [classes, routines, syllabi] = await Promise.all([
+        prisma.academicClass.findMany({
+          include: {
+            subjects: { where: { isActive: true }, orderBy: { sortOrder: "asc" } },
+            routines: true,
+          },
+          orderBy: { sortOrder: "asc" },
+        }).catch(() => []),
+        prisma.routine.findMany({
+          include: { class: true },
+          orderBy: { createdAt: "desc" },
+        }).catch(() => []),
+        prisma.syllabus.findMany({
+          orderBy: { createdAt: "desc" },
+        }).catch(() => []),
+      ]);
+    }
+  } catch (err) {
+    console.error("AdminAcademicsPage load error:", err);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50/50 py-8">
