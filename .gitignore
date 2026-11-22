@@ -30,6 +30,15 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# SQLite local databases
+prisma/*.db
+prisma/*.db*
+prisma/*.sqlite
+prisma/*.sqlite*
+
+# Private uploaded documents (admission certificates, marksheets, etc.)
+/private/
+
 # env files (can opt-in for committing if needed)
 .env*
 

@@ -13,6 +13,7 @@ import {
   Sparkles,
   ChevronRight,
   GraduationCap,
+  FileCheck,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 
@@ -21,8 +22,36 @@ export interface AcademicClassData {
   level: number | null;
   nameBn?: string | null;
   nameEn: string;
+  shift?: string | null;
+  academicYear?: string | null;
+  descriptionBn?: string | null;
   sortOrder: number;
   isActive: boolean;
+  subjects?: any[];
+}
+
+export interface UploadedRoutine {
+  id: string;
+  titleBn?: string | null;
+  titleEn: string;
+  routineType: string;
+  classId?: string | null;
+  year?: string | null;
+  fileUrl?: string | null;
+  contentBn?: string | null;
+  contentEn?: string | null;
+  isPublished: boolean;
+}
+
+export interface UploadedSyllabus {
+  id: string;
+  titleBn?: string | null;
+  titleEn: string;
+  year?: string | null;
+  classLevel?: string | null;
+  subject?: string | null;
+  fileUrl?: string | null;
+  isPublished: boolean;
 }
 
 // Preset details, subjects, and routine for each grade level
@@ -340,9 +369,13 @@ const classDetailsMap: Record<
 
 export default function AcademicClassExplorer({
   classes,
+  routines = [],
+  syllabi = [],
   locale = "bn",
 }: {
   classes: AcademicClassData[];
+  routines?: UploadedRoutine[];
+  syllabi?: UploadedSyllabus[];
   locale?: Locale;
 }) {
   const [selectedLevel, setSelectedLevel] = useState<number>(0);
@@ -353,6 +386,49 @@ export default function AcademicClassExplorer({
   const activeDetails =
     classDetailsMap[activeClass?.level ?? 0] || classDetailsMap[6];
 
+  // Matched uploaded files from CMS
+  const classRoutines = routines.filter((r) => r.classId === activeClass?.id && r.isPublished);
+  const classSyllabi = syllabi.filter((s) => {
+    const lvlStr = String(activeClass?.level ?? "");
+    const nameStr = activeClass?.nameBn || "";
+    return s.classLevel?.includes(lvlStr) || (nameStr && s.classLevel?.includes(nameStr));
+  });
+
+  const latestRoutinePdf = classRoutines.find((r) => r.fileUrl)?.fileUrl;
+
+  // Parse new weekly routine format (has workingDays + periods + entries)
+  // or fall back to legacy simple period array
+  const routineWithContent = classRoutines.find((r) => r.contentBn);
+  let weeklyRoutineData: { workingDays: Array<{key: string; nameBn: string; enabled: boolean}>; periods: Array<{id: string; period: string; time: string; isBreak?: boolean}>; entries: Array<{dayKey: string; periodId: string; subjectBn: string; teacherName?: string; roomNo?: string}> } | null = null;
+  let legacyPeriods: Array<{ period: string; time: string; subjectBn: string }> | null = null;
+
+  if (routineWithContent?.contentBn) {
+    try {
+      const parsed = JSON.parse(routineWithContent.contentBn);
+      if (parsed && parsed.workingDays && parsed.periods) {
+        weeklyRoutineData = parsed;
+      } else if (Array.isArray(parsed) && parsed.length > 0) {
+        legacyPeriods = parsed;
+      }
+    } catch { /* ignore */ }
+  }
+
+  const displayRoutine = legacyPeriods && legacyPeriods.length > 0
+    ? legacyPeriods
+    : activeDetails.routine;
+
+  // Check if database has dynamic subjects for this class
+  const classSubjects = (activeClass as any)?.subjects;
+  const dbSubjects = classSubjects && classSubjects.length > 0
+    ? classSubjects.map((s: any, idx: number) => ({
+        code: s.code || `SUB-${101 + idx}`,
+        nameBn: s.nameBn || s.nameEn,
+        nameEn: s.nameEn,
+        type: s.subjectType === "OPTIONAL" ? "ঐচ্ছিক" : "আবশ্যিক",
+        marks: s.fullMarks || 100,
+      }))
+    : null;
+
   const handleDownloadRoutine = () => {
     window.print();
   };
@@ -360,7 +436,7 @@ export default function AcademicClassExplorer({
   return (
     <div className="space-y-8">
       {/* 1. Grade Selector Grid */}
-      <div>
+      <div className="print:hidden">
         <h2 className="text-xl font-bold text-[#1e3a5f] flex items-center gap-2 mb-4">
           <BookOpen size={20} className="text-[#c9a84c]" />
           <span>
@@ -417,7 +493,7 @@ export default function AcademicClassExplorer({
       {/* 2. Detailed View for Selected Class */}
       <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
         {/* Class Banner Header */}
-        <div className="relative h-48 sm:h-56 md:h-64 w-full bg-slate-900 overflow-hidden">
+        <div className="relative h-48 sm:h-56 md:h-64 w-full bg-slate-900 overflow-hidden print:hidden">
           <Image
             src={activeDetails.banner}
             alt={activeClass?.nameBn || "Class Banner"}
@@ -452,7 +528,7 @@ export default function AcademicClassExplorer({
         <div className="p-6 sm:p-8 space-y-8">
           {/* Class 9 & 10 Group Tabs */}
           {activeDetails.groups && activeDetails.groups.length > 0 && (
-            <div className="p-4 bg-blue-50/70 border border-blue-200 rounded-2xl space-y-3">
+            <div className="p-4 bg-blue-50/70 border border-blue-200 rounded-2xl space-y-3 print:hidden">
               <span className="text-xs font-bold text-[#1e3a5f] uppercase tracking-wider block">
                 শাখা / বিভাগ নির্বাচন করুন:
               </span>
@@ -476,7 +552,7 @@ export default function AcademicClassExplorer({
           )}
 
           {/* Subjects Table */}
-          <div className="space-y-4">
+          <div className="space-y-4 print:hidden">
             <div className="flex items-center justify-between border-b border-gray-200 pb-3">
               <h3 className="font-extrabold text-[#1e3a5f] text-base sm:text-lg flex items-center gap-2">
                 <BookOpen size={20} className="text-[#c9a84c]" />
@@ -499,44 +575,175 @@ export default function AcademicClassExplorer({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 bg-white">
-                  {/* General / Core subjects */}
-                  {activeDetails.subjects.map((sub, i) => (
-                    <tr key={`core-${i}`} className="hover:bg-blue-50/30 transition-colors">
-                      <td className="p-3.5 font-bold text-gray-500">{sub.code}</td>
-                      <td className="p-3.5 font-bold text-[#1e3a5f]">{sub.nameBn}</td>
-                      <td className="p-3.5 text-gray-600">{sub.nameEn}</td>
-                      <td className="p-3.5">
-                        <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-[11px] font-semibold">
-                          {sub.type}
-                        </span>
-                      </td>
-                      <td className="p-3.5 text-right font-black text-gray-800">{sub.marks}</td>
-                    </tr>
-                  ))}
-
-                  {/* Group Specific Subjects (Class 9 & 10) */}
-                  {activeDetails.groups &&
-                    activeDetails.groups[selectedGroupIdx]?.subjects.map((sub, i) => (
-                      <tr key={`group-${i}`} className="bg-amber-50/40 hover:bg-amber-50/70 transition-colors">
-                        <td className="p-3.5 font-bold text-amber-800">{sub.code}</td>
+                  {/* Database dynamic subjects if added by admin */}
+                  {dbSubjects && dbSubjects.length > 0 ? (
+                    dbSubjects.map((sub: any, i: number) => (
+                      <tr key={`db-${i}`} className="hover:bg-blue-50/30 transition-colors">
+                        <td className="p-3.5 font-bold text-gray-500">{sub.code}</td>
                         <td className="p-3.5 font-bold text-[#1e3a5f]">{sub.nameBn}</td>
                         <td className="p-3.5 text-gray-600">{sub.nameEn}</td>
                         <td className="p-3.5">
-                          <span className="bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full text-[11px] font-semibold border border-amber-200">
+                          <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full text-[11px] font-semibold border border-emerald-200">
                             {sub.type}
                           </span>
                         </td>
                         <td className="p-3.5 text-right font-black text-gray-800">{sub.marks}</td>
                       </tr>
-                    ))}
+                    ))
+                  ) : (
+                    <>
+                      {/* General / Core subjects */}
+                      {activeDetails.subjects.map((sub, i) => (
+                        <tr key={`core-${i}`} className="hover:bg-blue-50/30 transition-colors">
+                          <td className="p-3.5 font-bold text-gray-500">{sub.code}</td>
+                          <td className="p-3.5 font-bold text-[#1e3a5f]">{sub.nameBn}</td>
+                          <td className="p-3.5 text-gray-600">{sub.nameEn}</td>
+                          <td className="p-3.5">
+                            <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-[11px] font-semibold">
+                              {sub.type}
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-right font-black text-gray-800">{sub.marks}</td>
+                        </tr>
+                      ))}
+
+                      {/* Group Specific Subjects (Class 9 & 10) */}
+                      {activeDetails.groups &&
+                        activeDetails.groups[selectedGroupIdx]?.subjects.map((sub, i) => (
+                          <tr key={`group-${i}`} className="bg-amber-50/40 hover:bg-amber-50/70 transition-colors">
+                            <td className="p-3.5 font-bold text-amber-800">{sub.code}</td>
+                            <td className="p-3.5 font-bold text-[#1e3a5f]">{sub.nameBn}</td>
+                            <td className="p-3.5 text-gray-600">{sub.nameEn}</td>
+                            <td className="p-3.5">
+                              <span className="bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full text-[11px] font-semibold border border-amber-200">
+                                {sub.type}
+                              </span>
+                            </td>
+                            <td className="p-3.5 text-right font-black text-gray-800">{sub.marks}</td>
+                          </tr>
+                        ))}
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
 
-          {/* Daily Routine / Timetable */}
-          <div className="space-y-4 pt-4 border-t border-gray-100">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-200 pb-3">
+          {/* Uploaded Documents / PDF Section from CMS */}
+          {(classRoutines.some((r) => r.fileUrl) || classSyllabi.some((s) => s.fileUrl)) && (
+            <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50/50 rounded-2xl border border-blue-200/80 space-y-3 print:hidden">
+              <h3 className="font-bold text-[#1e3a5f] text-sm flex items-center gap-2">
+                <FileCheck size={18} className="text-[#c9a84c]" />
+                <span>ডাউনলোডযোগ্য অফিসিয়াল একাডেমিক ফাইল ও পিডিএফ:</span>
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {classRoutines
+                  .filter((r) => r.fileUrl)
+                  .map((r) => (
+                    <a
+                      key={r.id}
+                      href={r.fileUrl!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-blue-200 text-xs font-bold text-[#1e3a5f] hover:bg-[#1e3a5f] hover:text-white transition-all shadow-xs"
+                    >
+                      <Download size={14} className="text-[#c9a84c]" />
+                      <span>{r.titleBn || r.titleEn} (পিডিএফ)</span>
+                    </a>
+                  ))}
+                {classSyllabi
+                  .filter((s) => s.fileUrl)
+                  .map((s) => (
+                    <a
+                      key={s.id}
+                      href={s.fileUrl!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-amber-200 text-xs font-bold text-amber-900 hover:bg-amber-500 hover:text-white transition-all shadow-xs"
+                    >
+                      <Download size={14} className="text-[#c9a84c]" />
+                      <span>{s.titleBn || s.titleEn}</span>
+                    </a>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Daily Routine / Timetable - STANDALONE SINGLE-PAGE A4 PRINT CONTAINER */}
+          <div id="only-printable-routine" className="space-y-4 pt-4 border-t border-gray-100 print:border-none print:pt-0">
+            {/* Strict Print CSS: Ensures ONLY this routine prints on exactly ONE single A4 page without blank pages */}
+            <style>{`
+              @page {
+                size: A4 portrait;
+                margin: 8mm 10mm;
+              }
+              @media print {
+                html, body {
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  background: white !important;
+                  width: 100% !important;
+                  height: auto !important;
+                  overflow: visible !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                }
+                body * {
+                  visibility: hidden !important;
+                }
+                #only-printable-routine,
+                #only-printable-routine * {
+                  visibility: visible !important;
+                }
+                #only-printable-routine {
+                  display: block !important;
+                  position: absolute !important;
+                  left: 0 !important;
+                  top: 0 !important;
+                  width: 100% !important;
+                  max-width: 190mm !important;
+                  margin: 0 auto !important;
+                  padding: 2mm 0 !important;
+                  border: none !important;
+                  box-shadow: none !important;
+                  page-break-after: avoid !important;
+                  page-break-before: avoid !important;
+                  page-break-inside: avoid !important;
+                }
+              }
+            `}</style>
+
+            {/* Print-Only Official Routine Header */}
+            <div className="hidden print:block text-center border-b-2 border-[#1e3a5f] pb-3 mb-3">
+              <div className="flex items-center justify-between mb-1">
+                <div className="w-12 h-12 relative shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/uploads/branding/logo.jpg"
+                    alt="School Logo"
+                    className="w-12 h-12 object-contain"
+                  />
+                </div>
+                <div className="text-center flex-1 px-3">
+                  <h1 className="text-2xl font-black text-[#1e3a5f] tracking-tight">
+                    পল্লবী বিদ্যানিকেতন
+                  </h1>
+                  <p className="text-[10.5px] text-gray-700 font-medium">
+                    মিরপুর-৭, পল্লবী, ঢাকা-১২১৬ • EIIN: ১০৮৩২৫ • ফোন: ০১৩MD-১০৮৩২৫
+                  </p>
+                </div>
+                <div className="w-12 shrink-0"></div>
+              </div>
+              <div className="mt-2 inline-flex items-center gap-2 bg-[#1e3a5f] text-white font-extrabold text-[11px] px-4 py-0.5 rounded-full uppercase tracking-wider">
+                <span>সাপ্তাহিক শ্রেণি রুটিন (শিক্ষাবর্ষ: {activeClass?.academicYear || '২০২৬'})</span>
+                <span>•</span>
+                <span>শ্রেণি: {activeClass?.nameBn}</span>
+                <span>•</span>
+                <span>শাখা: {activeClass?.shift || 'প্রভাতি শাখা'}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-200 pb-3 print:hidden">
               <div>
                 <h3 className="font-extrabold text-[#1e3a5f] text-base sm:text-lg flex items-center gap-2">
                   <Clock size={20} className="text-[#c9a84c]" />
@@ -550,31 +757,145 @@ export default function AcademicClassExplorer({
               <button
                 type="button"
                 onClick={handleDownloadRoutine}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1e3a5f] hover:bg-[#2b5182] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1e3a5f] hover:bg-[#2b5182] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer self-start sm:self-auto print:hidden"
               >
                 <Download size={14} />
                 <span>রুটিন প্রিন্ট / সেভ করুন</span>
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {activeDetails.routine.map((slot, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 bg-gray-50 rounded-2xl border border-gray-200 hover:border-blue-300 transition-colors"
-                >
-                  <div className="flex items-center justify-between text-[11px] font-bold text-gray-400 mb-1">
-                    <span>{slot.period}</span>
-                    <span className="text-[#c9a84c]">{slot.time}</span>
+            {/* Weekly Routine Timetable or Fallback Simple Grid */}
+            {weeklyRoutineData &&
+            weeklyRoutineData.periods &&
+            weeklyRoutineData.periods.length > 0 &&
+            weeklyRoutineData.workingDays &&
+            weeklyRoutineData.workingDays.filter((d) => d.enabled).length > 0 ? (
+              <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-xs print:border print:border-gray-400 print:shadow-none print:rounded-none">
+                <table className="w-full text-xs text-left border-collapse">
+                  <thead className="bg-[#1e3a5f] text-white print:bg-gray-100 print:text-black">
+                    <tr>
+                      <th className="p-3 border-r border-[#2b5182] print:border-gray-400 font-bold w-28 text-center print:py-2">
+                        পিরিয়ড / সময়
+                      </th>
+                      {weeklyRoutineData.workingDays
+                        .filter((d) => d.enabled)
+                        .map((day) => (
+                          <th
+                            key={day.key}
+                            className="p-3 border-r border-[#2b5182] print:border-gray-400 text-center font-bold print:py-2"
+                          >
+                            {day.nameBn}
+                          </th>
+                        ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 print:divide-gray-300 bg-white">
+                    {weeklyRoutineData.periods.map((period) => {
+                      if (period.isBreak) {
+                        return (
+                          <tr
+                            key={period.id}
+                            className="bg-amber-50/80 text-amber-900 font-bold text-center print:bg-gray-100"
+                          >
+                            <td className="p-2.5 font-bold border-r border-gray-200 print:border-gray-400 text-center print:py-1.5">
+                              <div>{period.period}</div>
+                              <div className="text-[10px] text-amber-700 font-mono print:text-gray-700">{period.time}</div>
+                            </td>
+                            <td
+                              colSpan={weeklyRoutineData!.workingDays.filter((d) => d.enabled).length}
+                              className="p-2.5 text-center tracking-wider text-xs font-bold text-amber-900 print:text-gray-900 print:py-1.5"
+                            >
+                              ★ বিরতি (টিফিন ও বিশ্রাম) ★
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return (
+                        <tr key={period.id} className="hover:bg-blue-50/30 transition-colors">
+                          <td className="p-2.5 bg-gray-50/80 font-bold border-r border-gray-200 print:border-gray-400 text-gray-700 w-28 text-center print:py-2">
+                            <div className="text-gray-900 font-bold">{period.period}</div>
+                            <div className="text-[10px] font-mono text-[#c9a84c] print:text-gray-700">
+                              {period.time}
+                            </div>
+                          </td>
+                          {weeklyRoutineData!.workingDays
+                            .filter((d) => d.enabled)
+                            .map((day) => {
+                              const entry = weeklyRoutineData!.entries?.find(
+                                (e) => e.dayKey === day.key && e.periodId === period.id
+                              );
+                              return (
+                                <td
+                                  key={day.key}
+                                  className="p-2.5 border-r border-gray-200 print:border-gray-400 text-center align-top min-w-[110px] print:py-2"
+                                >
+                                  {entry?.subjectBn ? (
+                                    <div className="space-y-0.5">
+                                      <div className="font-bold text-gray-900 text-xs">
+                                        {entry.subjectBn}
+                                      </div>
+                                      {entry.teacherName && (
+                                        <div className="text-[10px] text-gray-600 print:text-gray-700">
+                                          {entry.teacherName}
+                                        </div>
+                                      )}
+                                      {entry.roomNo && (
+                                        <div className="text-[9px] font-mono text-gray-400 print:text-gray-600">
+                                          কক্ষ: {entry.roomNo}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-gray-300 text-xs">—</span>
+                                  )}
+                                </td>
+                              );
+                            })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 print:grid-cols-4">
+                {displayRoutine.map((slot, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 bg-gray-50 rounded-2xl border border-gray-200 hover:border-blue-300 transition-colors print:p-2.5 print:rounded-lg"
+                  >
+                    <div className="flex items-center justify-between text-[11px] print:text-[9px] font-bold text-gray-400 mb-1">
+                      <span>{slot.period}</span>
+                      <span className="text-[#c9a84c] print:text-[#1e3a5f]">{slot.time}</span>
+                    </div>
+                    <h4 className="font-bold text-gray-900 text-sm print:text-xs">{slot.subjectBn}</h4>
                   </div>
-                  <h4 className="font-bold text-gray-900 text-sm">{slot.subjectBn}</h4>
+                ))}
+              </div>
+            )}
+
+            {/* Official Print-Only Signatures (Inside the Routine Container) */}
+            <div className="hidden print:flex justify-between items-end pt-6 mt-4 border-t border-gray-300 text-[10.5px]">
+              <div className="text-center w-36">
+                <div className="border-t border-gray-400 pt-1">
+                  <p className="font-bold text-gray-800">শ্রেণি শিক্ষকের স্বাক্ষর</p>
+                  <p className="text-[8.5px] text-gray-500">তারিখ: .....................</p>
                 </div>
-              ))}
+              </div>
+              <div className="w-20 h-10 border border-gray-300 rounded flex items-center justify-center text-[8px] text-gray-400 uppercase">
+                বিদ্যালয়ের সিল
+              </div>
+              <div className="text-center w-40">
+                <div className="border-t border-gray-400 pt-1">
+                  <p className="font-bold text-gray-800">প্রধান শিক্ষকের স্বাক্ষর ও সিল</p>
+                  <p className="text-[8.5px] text-gray-500">পল্লবী বিদ্যানিকেতন</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Bottom Actions */}
-          <div className="p-5 bg-gradient-to-r from-blue-50 to-amber-50 rounded-2xl border border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Bottom Actions (hidden in print) */}
+          <div className="p-5 bg-gradient-to-r from-blue-50 to-amber-50 rounded-2xl border border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
             <div>
               <h4 className="font-bold text-[#1e3a5f] text-sm">
                 এই শ্রেণিতে ২০২৬ শিক্ষাবর্ষে ভর্তি হতে চান?

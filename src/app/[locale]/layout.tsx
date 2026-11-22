@@ -44,21 +44,25 @@ export default async function LocaleLayout({
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fdfdfd] text-[#1a1a2e]">
-      <PublicHeader
-        locale={locale as Locale}
-        schoolName={schoolName}
-        logoUrl={profile?.logoUrl || "/uploads/branding/logo.jpg"}
-      />
+      <div className="print:hidden">
+        <PublicHeader
+          locale={locale as Locale}
+          schoolName={schoolName}
+          logoUrl={profile?.logoUrl || "/uploads/branding/logo.jpg"}
+        />
+      </div>
       <main className="flex-1">{children}</main>
-      <PublicFooter
-        locale={locale as Locale}
-        schoolName={schoolName}
-        phone={profile?.phone}
-        email={profile?.email}
-        address={locale === "bn" ? profile?.addressBn : profile?.addressEn}
-        facebookUrl={profile?.facebookUrl}
-        youtubeUrl={profile?.youtubeUrl}
-      />
+      <div className="print:hidden">
+        <PublicFooter
+          locale={locale as Locale}
+          schoolName={schoolName}
+          phone={profile?.phone}
+          email={profile?.email}
+          address={locale === "bn" ? profile?.addressBn : profile?.addressEn}
+          facebookUrl={profile?.facebookUrl}
+          youtubeUrl={profile?.youtubeUrl}
+        />
+      </div>
       <AnnouncementPopup popup={activePopup} locale={locale as Locale} />
     </div>
   );

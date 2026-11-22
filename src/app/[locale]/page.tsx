@@ -37,6 +37,7 @@ export default async function HomePage({
     events,
     featuredTeachers,
     recentAlbums,
+    headTeacher,
   ] = await Promise.all([
     prisma.schoolProfile.findFirst(),
     prisma.homepageSlide.findMany({
@@ -71,6 +72,9 @@ export default async function HomePage({
       include: { images: true },
       orderBy: { createdAt: "desc" },
       take: 4,
+    }),
+    prisma.adminProfile.findFirst({
+      where: { profileType: "HEAD_TEACHER", isPublished: true },
     }),
   ]);
 
@@ -146,8 +150,8 @@ export default async function HomePage({
             <div className="flex items-center gap-4">
               <div className="w-20 h-24 rounded-2xl bg-amber-50 overflow-hidden border-2 border-[#1e3a5f]/30 shrink-0 shadow-sm relative">
                 <Image
-                  src="/uploads/teachers/MD_SHAHE_ALAM.jpg"
-                  alt={locale === "bn" ? "মোঃ শাহে আলম" : "MD. SHAHE ALAM"}
+                  src={headTeacher?.photoUrl || "/uploads/teachers/MD_SHAHE_ALAM.jpg"}
+                  alt={locale === "bn" ? headTeacher?.nameBn || "মোঃ শাহে আলম" : headTeacher?.nameEn || "MD. SHAHE ALAM"}
                   fill
                   sizes="80px"
                   className="object-cover"
@@ -155,10 +159,14 @@ export default async function HomePage({
               </div>
               <div>
                 <h4 className="font-bold text-gray-900 text-sm">
-                  {locale === "bn" ? "মোঃ শাহে আলম" : "MD. SHAHE ALAM"}
+                  {locale === "bn"
+                    ? headTeacher?.nameBn || "মোঃ শাহে আলম"
+                    : headTeacher?.nameEn || "MD. SHAHE ALAM"}
                 </h4>
                 <p className="text-xs text-gray-500 font-medium">
-                  {locale === "bn" ? "প্রধান শিক্ষক" : "Headmaster"}
+                  {locale === "bn"
+                    ? headTeacher?.designationBn || "প্রধান শিক্ষক"
+                    : headTeacher?.designationEn || "Headmaster"}
                 </p>
                 <span className="text-[10px] text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full font-bold inline-block mt-1 border border-emerald-200">
                   {locale === "bn" ? "পল্লবী বিদ্যানিকেতন" : "Pallabi Bidyaniketan"}
@@ -167,9 +175,9 @@ export default async function HomePage({
             </div>
 
             <p className="text-xs sm:text-sm text-gray-600 leading-relaxed italic border-l-2 border-[#c9a84c] pl-3">
-              {locale === "bn"
-                ? "“পল্লবী বিদ্যানিকেতন প্রতিটি শিক্ষার্থীর সুপ্ত প্রতিভার বিকাশ ও দেশপ্রেমিক সুনাগরিক হিসেবে গড়ে তুলতে নিরলস কাজ করে যাচ্ছে। আমাদের লক্ষ্য আধুনিক প্রযুক্তিনির্ভর ও মূল্যবোধভিত্তিক শিক্ষাদান।”"
-                : "“Pallabi Bidyaniketan is continuously striving to nurture each student's inherent potential, guiding them to become enlightened and patriotic citizens.”"}
+              “{locale === "bn"
+                ? headTeacher?.messageBn || "পল্লবী বিদ্যানিকেতন প্রতিটি শিক্ষার্থীর সুপ্ত প্রতিভার বিকাশ ও দেশপ্রেমিক সুনাগরিক হিসেবে গড়ে তুলতে নিরলস কাজ করে যাচ্ছে। আমাদের লক্ষ্য আধুনিক প্রযুক্তিনির্ভর ও মূল্যবোধভিত্তিক শিক্ষাদান।"
+                : headTeacher?.messageEn || "Pallabi Bidyaniketan is continuously striving to nurture each student's inherent potential, guiding them to become enlightened and patriotic citizens."}”
             </p>
 
             <Link

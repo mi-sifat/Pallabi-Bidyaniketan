@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
-import { redirect } from "next/navigation";
 
 export default async function AdminLayout({
   children,
@@ -10,18 +9,21 @@ export default async function AdminLayout({
 }) {
   const session = await auth();
 
-  // If inside /admin (except /admin/login which has its own page), require auth
-  // In dev / initial run, if no session, redirect to login
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="h-screen w-screen flex bg-gray-50 overflow-hidden">
+      {/* Static Left Sidebar - Never scrolls with main page */}
       <AdminSidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+
+      {/* Right Column: Sticky Header + Independently Scrollable Main Area */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <AdminHeader
           userName={session?.user?.name}
           userEmail={session?.user?.email}
           userRole={(session?.user as { role?: string })?.role}
         />
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto bg-gray-50/70">
+          {children}
+        </main>
       </div>
     </div>
   );

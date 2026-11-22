@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
+  devIndicators: false,
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -20,6 +21,9 @@ const nextConfig: NextConfig = {
     localPatterns: [
       {
         pathname: "/uploads/**",
+      },
+      {
+        pathname: "/api/**",
       },
     ],
   },

@@ -222,6 +222,10 @@ model AdminProfile {
   bioBn           String?
   messageEn       String?
   messageBn       String?
+  phone           String?
+  email           String?
+  qualificationsEn String?
+  qualificationsBn String?
   termStart       DateTime?
   termEnd         DateTime?
   isCurrent       Boolean  @default(true)
@@ -251,8 +255,12 @@ model AcademicClass {
   id          String   @id @default(cuid())
   nameEn      String
   nameBn      String?
-  level       Int?     // e.g. 6, 7, 8, 9, 10
+  level       Int?     // e.g. 0, 1, 2, ... 10
   section     String?
+  shift       String?  // প্রভাতি / দিবা শাখা
+  academicYear String? @default("2026")
+  descriptionBn String?
+  descriptionEn String?
   isActive    Boolean  @default(false)  // inactive until confirmed
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
@@ -265,16 +273,21 @@ model AcademicClass {
 }
 
 model Subject {
-  id        String   @id @default(cuid())
-  nameEn    String
-  nameBn    String?
-  code      String?
-  classId   String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  nameEn      String
+  nameBn      String?
+  code        String?
+  classId     String?
+  subjectType String?  @default("COMPULSORY") // COMPULSORY | OPTIONAL
+  fullMarks   Int?     @default(100)
+  description String?
+  sortOrder   Int      @default(0)
+  academicYear String? @default("2026")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  class     AcademicClass? @relation(fields: [classId], references: [id])
+  class       AcademicClass? @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   @@map("subjects")
 }
@@ -299,8 +312,10 @@ model Routine {
   id          String   @id @default(cuid())
   titleEn     String
   titleBn     String?
-  routineType RoutineType
+  routineType RoutineType @default(CLASS_ROUTINE)
   classId     String?
+  section     String?
+  shift       String?
   year        String?
   contentEn   String?
   contentBn   String?
@@ -310,7 +325,7 @@ model Routine {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  class       AcademicClass? @relation(fields: [classId], references: [id])
+  class       AcademicClass? @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   @@map("routines")
 }
@@ -563,6 +578,73 @@ model AdmissionInfo {
   updatedAt   DateTime @updatedAt
 
   @@map("admission_info")
+}
+
+model AdmissionApplication {
+  id                      String                  @id @default(cuid())
+  applicationNo           String                  @unique
+  academicYear            String                  @default("2026-2027")
+  applyingClass           String
+  
+  // Student Information
+  studentNameBn           String
+  studentNameEn           String
+  dob                     String
+  gender                  String                  // ছাত্র / ছাত্রী (Male / Female)
+  birthRegNo              String
+  nationality             String                  @default("বাংলাদেশী")
+  religion                String?
+  bloodGroup              String?
+  presentAddress          String
+  permanentAddress        String
+  previousSchool          String?
+  previousClass           String?
+  previousResult          String?
+
+  // Parent / Guardian Information
+  fatherName              String
+  fatherPhone             String
+  fatherNid               String?
+  fatherOccupation        String?
+  motherName              String
+  motherPhone             String?
+  motherNid               String?
+  motherOccupation        String?
+  guardianName            String?
+  guardianPhone           String?
+  guardianRelation        String?
+  emergencyPhone          String
+
+  // Uploaded Document URLs
+  photoUrl                String?
+  birthCertificateUrl     String?
+  marksheetUrl            String?
+  transferCertificateUrl  String?
+  otherDocUrl             String?
+
+  // Admin Management & Follow-up
+  status                  AdmissionStatus         @default(SUBMITTED)
+  contactedDate           DateTime?
+  contactedBy             String?
+  internalNotes           String?
+  decisionDate            DateTime?
+  finalDecision           String?
+
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+
+  @@index([status, createdAt])
+  @@index([applyingClass])
+  @@map("admission_applications")
+}
+
+enum AdmissionStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  CONTACTED
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
 }
 
 // ─────────────────────────────────────────────

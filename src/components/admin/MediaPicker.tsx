@@ -23,7 +23,7 @@ interface MediaItem {
 }
 
 interface MediaPickerProps {
-  value?: string;
+  value?: string | null;
   onChange: (url: string) => void;
   label?: string;
   category?: string;

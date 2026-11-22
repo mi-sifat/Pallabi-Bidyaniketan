@@ -12,6 +12,7 @@ const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp
 async function checkMediaUsage(url: string) {
   const [
     teachers,
+    adminProfiles,
     slides,
     popups,
     events,
@@ -20,6 +21,7 @@ async function checkMediaUsage(url: string) {
     news,
   ] = await Promise.all([
     prisma.teacher.findMany({ where: { photoUrl: url }, select: { nameBn: true, nameEn: true } }),
+    prisma.adminProfile.findMany({ where: { photoUrl: url }, select: { nameBn: true, nameEn: true, designationBn: true } }),
     prisma.homepageSlide.findMany({ where: { imageUrl: url }, select: { titleBn: true, titleEn: true } }),
     prisma.announcementPopup.findMany({ where: { imageUrl: url }, select: { titleBn: true, titleEn: true } }),
     prisma.schoolEvent.findMany({ where: { coverImageUrl: url }, select: { titleBn: true, titleEn: true } }),
@@ -30,6 +32,7 @@ async function checkMediaUsage(url: string) {
 
   const places: string[] = [];
   if (teachers.length > 0) places.push(`শিক্ষক প্রোফাইল (${teachers.map((t) => t.nameBn || t.nameEn).slice(0, 3).join(", ")})`);
+  if (adminProfiles.length > 0) places.push(`প্রশাসনিক নেতৃত্ব (${adminProfiles.map((p) => p.nameBn || p.nameEn).join(", ")})`);
   if (slides.length > 0) places.push(`হোমপেজ স্লাইডার (${slides.length}টি স্লাইড)`);
   if (popups.length > 0) places.push(`জরুরি ঘোষণা পপ-আপ (${popups.length}টি)`);
   if (events.length > 0) places.push(`ইভেন্ট কভার (${events.length}টি)`);

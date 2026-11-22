@@ -1,10 +1,13 @@
-export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 import { BookOpen, Calendar, Clock, FileCheck } from "lucide-react";
-import AcademicClassExplorer from "@/components/public/AcademicClassExplorer";
+import AcademicClassExplorer, {
+  AcademicClassData,
+  UploadedRoutine,
+  UploadedSyllabus,
+} from "@/components/public/AcademicClassExplorer";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function AcademicsPage({
   params,
@@ -12,14 +15,28 @@ export default async function AcademicsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = (await params) as { locale: Locale };
-  const classes = await prisma.academicClass.findMany({
-    orderBy: { sortOrder: "asc" },
-  });
+
+  // Fetch dynamic classes, routines, and syllabi from database
+  const [classes, routines, syllabi] = await Promise.all([
+    prisma.academicClass.findMany({
+      where: { isActive: true },
+      include: { subjects: { where: { isActive: true } } },
+      orderBy: { sortOrder: "asc" },
+    }),
+    prisma.routine.findMany({
+      where: { isPublished: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.syllabus.findMany({
+      where: { isPublished: true },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-6xl space-y-12">
+    <div className="container mx-auto px-4 py-12 max-w-6xl space-y-12 print:p-0 print:m-0 print:max-w-none print:space-y-0">
       {/* Page Header */}
-      <div className="border-b border-gray-200 pb-4">
+      <div className="border-b border-gray-200 pb-4 print:hidden">
         <h1 className="text-3xl font-extrabold text-[#1e3a5f]">
           {locale === "bn" ? "একাডেমিক তথ্য ও শ্রেণি কার্যক্রম" : "Academics & Curriculum"}
         </h1>
@@ -31,10 +48,15 @@ export default async function AcademicsPage({
       </div>
 
       {/* Interactive Class Explorer (শিশু শ্রেণি থেকে ১০ম শ্রেণি) */}
-      <AcademicClassExplorer classes={classes} locale={locale} />
+      <AcademicClassExplorer
+        classes={classes as unknown as AcademicClassData[]}
+        routines={routines as unknown as UploadedRoutine[]}
+        syllabi={syllabi as unknown as UploadedSyllabus[]}
+        locale={locale}
+      />
 
       {/* Academic Highlights Features */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-gray-200">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-gray-200 print:hidden">
         <div className="bg-white p-6 rounded-2xl border border-gray-200 space-y-2 shadow-xs">
           <Calendar className="text-[#c9a84c]" size={24} />
           <h3 className="font-bold text-gray-900 text-base">

@@ -14,26 +14,35 @@ export default async function HeadmasterMessagePage({
 }) {
   const { locale } = (await params) as { locale: Locale };
 
-  // Fetch headmaster record if available
-  const headmaster = await prisma.teacher.findFirst({
-    where: {
-      OR: [
-        { designationEn: { contains: "Headmaster" } },
-        { designationBn: { contains: "প্রধান শিক্ষক" } },
-        { nameEn: { contains: "SHAHE ALAM" } },
-      ],
-    },
+  // Fetch headmaster record from centralized AdminProfile
+  const headProfile = await prisma.adminProfile.findFirst({
+    where: { profileType: "HEAD_TEACHER" },
   });
 
-  const photoUrl = headmaster?.photoUrl || "/uploads/teachers/MD_SHAHE_ALAM.jpg";
+  // Fallback to teacher table if not in adminProfile
+  const teacherHead = !headProfile
+    ? await prisma.teacher.findFirst({
+        where: {
+          OR: [
+            { designationEn: { contains: "Headmaster" } },
+            { designationBn: { contains: "প্রধান শিক্ষক" } },
+            { nameEn: { contains: "SHAHE ALAM" } },
+          ],
+        },
+      })
+    : null;
+
+  const photoUrl = headProfile?.photoUrl || teacherHead?.photoUrl || "/uploads/teachers/MD_SHAHE_ALAM.jpg";
   const name =
     locale === "bn"
-      ? headmaster?.nameBn || "মোঃ শাহে আলম"
-      : headmaster?.nameEn || "MD. SHAHE ALAM";
+      ? headProfile?.nameBn || teacherHead?.nameBn || "মোঃ শাহে আলম"
+      : headProfile?.nameEn || teacherHead?.nameEn || "MD. SHAHE ALAM";
   const designation =
     locale === "bn"
-      ? headmaster?.designationBn || "প্রধান শিক্ষক"
-      : headmaster?.designationEn || "Headmaster";
+      ? headProfile?.designationBn || teacherHead?.designationBn || "প্রধান শিক্ষক"
+      : headProfile?.designationEn || teacherHead?.designationEn || "Headmaster";
+  const customMessage =
+    locale === "bn" ? headProfile?.messageBn : headProfile?.messageEn;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-5xl space-y-10">
