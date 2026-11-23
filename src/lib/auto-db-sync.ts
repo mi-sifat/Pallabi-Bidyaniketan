@@ -12,8 +12,8 @@ const DEFAULT_CLASSES = [
   { level: 6, nameBn: "ষষ্ঠ শ্রেণি", nameEn: "Class 6", shift: "প্রভাতি ও দিবা শাখা", sortOrder: 6 },
   { level: 7, nameBn: "সপ্তম শ্রেণি", nameEn: "Class 7", shift: "প্রভাতি ও দিবা শাখা", sortOrder: 7 },
   { level: 8, nameBn: "অষ্টম শ্রেণি", nameEn: "Class 8", shift: "প্রভাতি ও দিবা শাখা", sortOrder: 8 },
-  { level: 9, nameBn: "নবম শ্রেণি", nameEn: "Class 9", shift: "প্রভাতি ও দিবা শাখা", sortOrder: 9 },
-  { level: 10, nameBn: "দশম শ্রেণি", nameEn: "Class 10", shift: "প্রভাতি ও দিবা শাখা", sortOrder: 10 },
+  { level: 9, nameBn: "নবম-দশম শ্রেণি", nameEn: "Class 9-10 (Secondary)", shift: "প্রভাতি ও দিবা শাখা", sortOrder: 9 },
+  { level: 10, nameBn: "দশম শ্রেণি (এসএসসি প্রস্তুতি)", nameEn: "Class 10 (SSC Prep)", shift: "প্রভাতি ও দিবা শাখা", sortOrder: 10 },
 ];
 
 const NCTB_STANDARDS: Record<number, Array<{ code: string; nameBn: string; nameEn: string; type: string; marks: number }>> = {
@@ -225,91 +225,94 @@ export async function ensureDatabaseSchema() {
       );
     `).catch(() => {});
 
-    // 3. Auto-populate classes & routines on Neon if empty
-    const existingClassesCount = await prisma.academicClass.count().catch(() => 0);
-    if (existingClassesCount < 11) {
-      for (const def of DEFAULT_CLASSES) {
-        const existing = await prisma.academicClass.findFirst({
-          where: { level: def.level },
-        });
+    // 3. Auto-populate classes & routines on Neon
+    for (const def of DEFAULT_CLASSES) {
+      let existing = await prisma.academicClass.findFirst({
+        where: { level: def.level },
+      });
 
-        let classId = existing?.id;
-        if (!existing) {
-          const created = await prisma.academicClass.create({
-            data: {
-              level: def.level,
-              nameBn: def.nameBn,
-              nameEn: def.nameEn,
-              shift: def.shift,
-              academicYear: "2026",
-              isActive: true,
-              sortOrder: def.sortOrder,
-            },
-          });
-          classId = created.id;
-        }
+      let classId = existing?.id;
+      if (!existing) {
+        const created = await prisma.academicClass.create({
+          data: {
+            level: def.level,
+            nameBn: def.nameBn,
+            nameEn: def.nameEn,
+            shift: def.shift,
+            academicYear: "2026",
+            isActive: true,
+            sortOrder: def.sortOrder,
+          },
+        }).catch(() => null);
+        classId = created?.id;
+      } else if (def.level === 9 && existing.nameBn !== "নবম-দশম শ্রেণি") {
+        // Auto-update Class 9 to 'নবম-দশম শ্রেণি'
+        await prisma.academicClass.update({
+          where: { id: existing.id },
+          data: { nameBn: "নবম-দশম শ্রেণি", nameEn: "Class 9-10 (Secondary)" },
+        }).catch(() => {});
+      }
 
-        if (classId) {
-          // Check subjects
-          const subCount = await prisma.subject.count({ where: { classId } });
-          const stdSubjects = NCTB_STANDARDS[def.level] || [];
-          if (subCount === 0 && stdSubjects.length > 0) {
-            for (let idx = 0; idx < stdSubjects.length; idx++) {
-              const sub = stdSubjects[idx];
-              await prisma.subject.create({
-                data: {
-                  code: sub.code,
-                  nameBn: sub.nameBn,
-                  nameEn: sub.nameEn,
-                  subjectType: sub.type,
-                  fullMarks: sub.marks,
-                  sortOrder: idx,
-                  academicYear: "2026",
-                  classId,
-                  isActive: true,
-                },
-              }).catch(() => {});
-            }
-          }
-
-          // Check routine
-          const routineCount = await prisma.routine.count({ where: { classId } });
-          if (routineCount === 0) {
-            const entries: any[] = [];
-            let sIdx = 0;
-            for (const d of DEFAULT_WORKING_DAYS) {
-              for (const p of DEFAULT_PERIODS) {
-                if (p.isBreak) continue;
-                const sub = stdSubjects[sIdx % stdSubjects.length];
-                sIdx++;
-                entries.push({
-                  dayKey: d.key,
-                  periodId: p.id,
-                  subjectBn: sub?.nameBn || "সাধারণ বিষয়",
-                  teacherName: "বিষয় শিক্ষক",
-                  roomNo: `${100 + (def.level || 1)}`,
-                });
-              }
-            }
-
-            await prisma.routine.create({
+      if (classId) {
+        // Check subjects
+        const subCount = await prisma.subject.count({ where: { classId } }).catch(() => 0);
+        const stdSubjects = NCTB_STANDARDS[def.level] || [];
+        if (subCount === 0 && stdSubjects.length > 0) {
+          for (let idx = 0; idx < stdSubjects.length; idx++) {
+            const sub = stdSubjects[idx];
+            await prisma.subject.create({
               data: {
-                titleEn: `${def.nameEn} Weekly Routine`,
-                titleBn: `${def.nameBn} সাপ্তাহিক ক্লাস রুটিন`,
-                routineType: "CLASS_ROUTINE",
+                code: sub.code,
+                nameBn: sub.nameBn,
+                nameEn: sub.nameEn,
+                subjectType: sub.type,
+                fullMarks: sub.marks,
+                sortOrder: idx,
+                academicYear: "2026",
                 classId,
-                shift: def.shift,
-                year: "2026",
-                contentBn: JSON.stringify({
-                  workingDays: DEFAULT_WORKING_DAYS,
-                  periods: DEFAULT_PERIODS,
-                  entries,
-                }),
-                status: "PUBLISHED",
-                isPublished: true,
+                isActive: true,
               },
             }).catch(() => {});
           }
+        }
+
+        // Check routine
+        const routineCount = await prisma.routine.count({ where: { classId } }).catch(() => 0);
+        if (routineCount === 0) {
+          const entries: any[] = [];
+          let sIdx = 0;
+          for (const d of DEFAULT_WORKING_DAYS) {
+            for (const p of DEFAULT_PERIODS) {
+              if (p.isBreak) continue;
+              const sub = stdSubjects[sIdx % (stdSubjects.length || 1)];
+              sIdx++;
+              entries.push({
+                dayKey: d.key,
+                periodId: p.id,
+                subjectBn: sub?.nameBn || "সাধারণ বিষয়",
+                teacherName: "বিষয় শিক্ষক",
+                roomNo: `${100 + (def.level || 1)}`,
+              });
+            }
+          }
+
+          await prisma.routine.create({
+            data: {
+              titleEn: `${def.nameEn} Weekly Routine`,
+              titleBn: `${def.nameBn} সাপ্তাহিক ক্লাস রুটিন`,
+              routineType: "CLASS_ROUTINE",
+              classId,
+              shift: def.shift,
+              year: "2026",
+              contentBn: JSON.stringify({
+                workingDays: DEFAULT_WORKING_DAYS,
+                periods: DEFAULT_PERIODS,
+                entries,
+              }),
+              status: "PUBLISHED",
+              isPublished: true,
+            },
+          }).catch(() => {});
         }
       }
     }

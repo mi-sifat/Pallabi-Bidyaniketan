@@ -9,6 +9,11 @@ export default async function AdminLayout({
 }) {
   const session = await auth();
 
+  // If there is no authenticated session (e.g. login page), render children cleanly without sidebar or header
+  if (!session) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="h-screen w-screen flex bg-gray-50 overflow-hidden">
       {/* Static Left Sidebar - Never scrolls with main page */}

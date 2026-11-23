@@ -262,7 +262,7 @@ const classDetailsMap: Record<
   9: {
     banner: "/uploads/gallery/623386697_1482203917244674_8855631261609445030_n.jpg",
     shift: "মাধ্যমিক শাখা (সকাল ১০:০০ - ০৪:৩০)",
-    descriptionBn: "৯ম শ্রেণিতে বিজ্ঞান, ব্যবসায় শিক্ষা ও মানবিক বিভাগে আলাদা পাঠ্যসূচি ও প্র্যাকটিক্যাল ল্যাব ক্লাস পরিচালিত হয়।",
+    descriptionBn: "নবম-দশম শ্রেণিতে বিজ্ঞান, ব্যবসায় শিক্ষা ও মানবিক বিভাগে আলাদা পাঠ্যসূচি, প্র্যাকটিক্যাল ল্যাব ক্লাস ও এসএসসি প্রস্তুতি পরিচালিত হয়।",
     subjects: [
       { code: "101-102", nameBn: "বাংলা ১ম ও ২য় পত্র", nameEn: "Bangla 1st & 2nd", type: "আবশ্যিক", marks: 200 },
       { code: "107-108", nameBn: "ইংরেজি ১ম ও ২য় পত্র", nameEn: "English 1st & 2nd", type: "আবশ্যিক", marks: 200 },
@@ -377,8 +377,7 @@ const DEFAULT_FALLBACK_CLASSES: AcademicClassData[] = [
   { id: "class-6", level: 6, nameBn: "ষষ্ঠ শ্রেণি", nameEn: "Class 6", sortOrder: 6, isActive: true },
   { id: "class-7", level: 7, nameBn: "সপ্তম শ্রেণি", nameEn: "Class 7", sortOrder: 7, isActive: true },
   { id: "class-8", level: 8, nameBn: "অষ্টম শ্রেণি", nameEn: "Class 8", sortOrder: 8, isActive: true },
-  { id: "class-9", level: 9, nameBn: "নবম শ্রেণি", nameEn: "Class 9", sortOrder: 9, isActive: true },
-  { id: "class-10", level: 10, nameBn: "দশম শ্রেণি", nameEn: "Class 10", sortOrder: 10, isActive: true },
+  { id: "class-9", level: 9, nameBn: "নবম-দশম শ্রেণি", nameEn: "Class 9-10", sortOrder: 9, isActive: true },
 ];
 
 export default function AcademicClassExplorer({
@@ -395,11 +394,26 @@ export default function AcademicClassExplorer({
   const [selectedLevel, setSelectedLevel] = useState<number>(0);
   const [selectedGroupIdx, setSelectedGroupIdx] = useState<number>(0);
 
+  const rawClasses = classes || [];
+  // Merge Class 9 and 10 into single 'নবম-দশম শ্রেণি'
+  const sanitizedClasses = rawClasses
+    .filter((c) => c.level !== 10)
+    .map((c) => {
+      if (c.level === 9) {
+        return {
+          ...c,
+          nameBn: "নবম-দশম শ্রেণি",
+          nameEn: "Class 9-10",
+        };
+      }
+      return c;
+    });
+
   const displayClasses =
-    classes && classes.length >= 10
-      ? classes
+    sanitizedClasses.length >= 9
+      ? sanitizedClasses
       : DEFAULT_FALLBACK_CLASSES.map((defCls) => {
-          const found = classes?.find((c) => c.level === defCls.level);
+          const found = sanitizedClasses.find((c) => c.level === defCls.level);
           return found || defCls;
         });
 

@@ -185,6 +185,27 @@ export default function AcademicManager({
   const [routines, setRoutines] = useState<RoutineItem[]>(initialRoutines);
   const [syllabi, setSyllabi] = useState<SyllabusItem[]>(initialSyllabi);
   const [toast, setToast] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncDefaults = async () => {
+    if (!confirm("আপনি কি NCTB স্ট্যান্ডার্ড অনুযায়ী সকল শ্রেণির ডিফল্ট সাপ্তাহিক রুটিন ডাটাবেজে সিঙ্ক/আপডেট করতে চান?")) return;
+    setIsSyncing(true);
+    try {
+      const res = await fetch("/api/admin/academics/sync-defaults", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        if (data.routines) setRoutines(data.routines);
+        if (data.classes) setClasses(data.classes);
+        setToast({ type: "success", text: data.message || "রুটিন সফলভাবে সিঙ্ক সম্পন্ন হয়েছে!" });
+      } else {
+        setToast({ type: "error", text: data.error || "সিঙ্ক প্রক্রিয়া ব্যর্থ হয়েছে।" });
+      }
+    } catch {
+      setToast({ type: "error", text: "সার্ভারের সাথে সংযোগে সমস্যা হয়েছে।" });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // ── Class Modal ──
   const [isClassModalOpen, setIsClassModalOpen] = useState(false);
@@ -1016,13 +1037,34 @@ export default function AcademicManager({
                 <h2 className="text-lg font-bold text-[#1e3a5f]">শ্রেণিভিত্তিক রুটিন ব্যবস্থাপনা</h2>
                 <p className="text-xs text-gray-500">Visual Weekly Routine Builder — সাপ্তাহিক পিরিয়ড ও বিষয় কনফিগার করুন</p>
               </div>
-              <button
-                type="button"
-                onClick={openNewRoutineModal}
-                className="btn-primary !text-xs !py-2 cursor-pointer"
-              >
-                <Grid3X3 size={16} /> নতুন রুটিন তৈরি করুন
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSyncDefaults}
+                  disabled={isSyncing}
+                  className="px-3 py-2 rounded-xl text-xs font-bold transition-all border border-emerald-600/30 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  title="NCTB সিলেবাস অনুযায়ী সকল শ্রেণির সাপ্তাহিক রুটিন অটো-সিঙ্ক করুন"
+                >
+                  {isSyncing ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin text-emerald-700" />
+                      <span>সিঙ্ক হচ্ছে...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw size={14} className="text-emerald-700" />
+                      <span>ডিফল্ট রুটিন সিঙ্ক</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={openNewRoutineModal}
+                  className="btn-primary !text-xs !py-2 cursor-pointer"
+                >
+                  <Grid3X3 size={16} /> নতুন রুটিন তৈরি করুন
+                </button>
+              </div>
             </div>
 
             {routines.length > 0 ? (
@@ -1106,9 +1148,34 @@ export default function AcademicManager({
                 })}
               </div>
             ) : (
-              <div className="p-10 text-center text-sm text-gray-400 space-y-2">
-                <Grid3X3 size={32} className="mx-auto opacity-30" />
-                <p>এখনো কোনো রুটিন তৈরি করা হয়নি</p>
+              <div className="p-10 text-center text-sm text-gray-500 space-y-4 max-w-md mx-auto">
+                <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto border border-emerald-100">
+                  <Grid3X3 size={28} />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-bold text-gray-800 text-base">ডাটাবেজে কোনো রুটিন পাওয়া যায়নি</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    NCTB কারিকুলাম ও স্কুলের সময়সূচি অনুযায়ী সকল শ্রেণির ২D সাপ্তাহিক ক্লাস রুটিন এক ক্লিকে ডাটাবেজে যুক্ত করতে নিচের বাটনে চাপ দিন।
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSyncDefaults}
+                  disabled={isSyncing}
+                  className="btn-primary !text-xs !py-2.5 !px-5 mx-auto cursor-pointer"
+                >
+                  {isSyncing ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>রুটিন সিঙ্ক হচ্ছে...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw size={16} />
+                      <span>সকল শ্রেণির রুটিন সিঙ্ক করুন</span>
+                    </>
+                  )}
+                </button>
               </div>
             )}
           </div>

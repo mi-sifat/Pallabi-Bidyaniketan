@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { ensureDatabaseSchema } from "@/lib/auto-db-sync";
 import AcademicManager, {
   AcademicClassItem,
   RoutineItem,
@@ -30,6 +31,24 @@ export default async function AdminAcademicsPage() {
           orderBy: { createdAt: "desc" },
         }).catch(() => []),
       ]);
+
+      // If routines are 0 in production DB, run ensureDatabaseSchema to auto-seed them
+      if (routines.length === 0 || classes.length === 0) {
+        await ensureDatabaseSchema().catch(() => {});
+        [classes, routines] = await Promise.all([
+          prisma.academicClass.findMany({
+            include: {
+              subjects: { where: { isActive: true }, orderBy: { sortOrder: "asc" } },
+              routines: true,
+            },
+            orderBy: { sortOrder: "asc" },
+          }).catch(() => classes),
+          prisma.routine.findMany({
+            include: { class: true },
+            orderBy: { createdAt: "desc" },
+          }).catch(() => routines),
+        ]);
+      }
     }
   } catch (err) {
     console.error("AdminAcademicsPage load error:", err);
