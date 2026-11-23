@@ -367,6 +367,20 @@ const classDetailsMap: Record<
   },
 };
 
+const DEFAULT_FALLBACK_CLASSES: AcademicClassData[] = [
+  { id: "play", level: 0, nameBn: "শিশু শ্রেণি", nameEn: "Play Group", sortOrder: 0, isActive: true },
+  { id: "class-1", level: 1, nameBn: "প্রথম শ্রেণি", nameEn: "Class 1", sortOrder: 1, isActive: true },
+  { id: "class-2", level: 2, nameBn: "দ্বিতীয় শ্রেণি", nameEn: "Class 2", sortOrder: 2, isActive: true },
+  { id: "class-3", level: 3, nameBn: "তৃতীয় শ্রেণি", nameEn: "Class 3", sortOrder: 3, isActive: true },
+  { id: "class-4", level: 4, nameBn: "চতুর্থ শ্রেণি", nameEn: "Class 4", sortOrder: 4, isActive: true },
+  { id: "class-5", level: 5, nameBn: "পঞ্চম শ্রেণি", nameEn: "Class 5", sortOrder: 5, isActive: true },
+  { id: "class-6", level: 6, nameBn: "ষষ্ঠ শ্রেণি", nameEn: "Class 6", sortOrder: 6, isActive: true },
+  { id: "class-7", level: 7, nameBn: "সপ্তম শ্রেণি", nameEn: "Class 7", sortOrder: 7, isActive: true },
+  { id: "class-8", level: 8, nameBn: "অষ্টম শ্রেণি", nameEn: "Class 8", sortOrder: 8, isActive: true },
+  { id: "class-9", level: 9, nameBn: "নবম শ্রেণি", nameEn: "Class 9", sortOrder: 9, isActive: true },
+  { id: "class-10", level: 10, nameBn: "দশম শ্রেণি", nameEn: "Class 10", sortOrder: 10, isActive: true },
+];
+
 export default function AcademicClassExplorer({
   classes,
   routines = [],
@@ -381,14 +395,22 @@ export default function AcademicClassExplorer({
   const [selectedLevel, setSelectedLevel] = useState<number>(0);
   const [selectedGroupIdx, setSelectedGroupIdx] = useState<number>(0);
 
+  const displayClasses =
+    classes && classes.length >= 10
+      ? classes
+      : DEFAULT_FALLBACK_CLASSES.map((defCls) => {
+          const found = classes?.find((c) => c.level === defCls.level);
+          return found || defCls;
+        });
+
   const activeClass =
-    classes.find((c) => c.level === selectedLevel) || classes[0];
+    displayClasses.find((c) => c.level === selectedLevel) || displayClasses[0];
   const activeDetails =
     classDetailsMap[activeClass?.level ?? 0] || classDetailsMap[6];
 
   // Matched uploaded files from CMS
-  const classRoutines = routines.filter((r) => r.classId === activeClass?.id && r.isPublished);
-  const classSyllabi = syllabi.filter((s) => {
+  const classRoutines = (routines || []).filter((r) => r.classId === activeClass?.id && r.isPublished);
+  const classSyllabi = (syllabi || []).filter((s) => {
     const lvlStr = String(activeClass?.level ?? "");
     const nameStr = activeClass?.nameBn || "";
     return s.classLevel?.includes(lvlStr) || (nameStr && s.classLevel?.includes(nameStr));
@@ -397,9 +419,13 @@ export default function AcademicClassExplorer({
   const latestRoutinePdf = classRoutines.find((r) => r.fileUrl)?.fileUrl;
 
   // Parse new weekly routine format (has workingDays + periods + entries)
-  // or fall back to legacy simple period array
+  // or fall back to standard 2D weekly timetable
   const routineWithContent = classRoutines.find((r) => r.contentBn);
-  let weeklyRoutineData: { workingDays: Array<{key: string; nameBn: string; enabled: boolean}>; periods: Array<{id: string; period: string; time: string; isBreak?: boolean}>; entries: Array<{dayKey: string; periodId: string; subjectBn: string; teacherName?: string; roomNo?: string}> } | null = null;
+  let weeklyRoutineData: {
+    workingDays: Array<{ key: string; nameBn: string; enabled: boolean }>;
+    periods: Array<{ id: string; period: string; time: string; isBreak?: boolean }>;
+    entries: Array<{ dayKey: string; periodId: string; subjectBn: string; teacherName?: string; roomNo?: string }>;
+  } | null = null;
   let legacyPeriods: Array<{ period: string; time: string; subjectBn: string }> | null = null;
 
   if (routineWithContent?.contentBn) {
@@ -410,24 +436,72 @@ export default function AcademicClassExplorer({
       } else if (Array.isArray(parsed) && parsed.length > 0) {
         legacyPeriods = parsed;
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
-
-  const displayRoutine = legacyPeriods && legacyPeriods.length > 0
-    ? legacyPeriods
-    : activeDetails.routine;
 
   // Check if database has dynamic subjects for this class
   const classSubjects = (activeClass as any)?.subjects;
-  const dbSubjects = classSubjects && classSubjects.length > 0
-    ? classSubjects.map((s: any, idx: number) => ({
-        code: s.code || `SUB-${101 + idx}`,
-        nameBn: s.nameBn || s.nameEn,
-        nameEn: s.nameEn,
-        type: s.subjectType === "OPTIONAL" ? "ঐচ্ছিক" : "আবশ্যিক",
-        marks: s.fullMarks || 100,
-      }))
-    : null;
+  const dbSubjects =
+    classSubjects && classSubjects.length > 0
+      ? classSubjects.map((s: any, idx: number) => ({
+          code: s.code || `SUB-${101 + idx}`,
+          nameBn: s.nameBn || s.nameEn,
+          nameEn: s.nameEn,
+          type: s.subjectType === "OPTIONAL" ? "ঐচ্ছিক" : "আবশ্যিক",
+          marks: s.fullMarks || 100,
+        }))
+      : null;
+
+  // Always ensure weekly routine data is available (Generate 2D timetable if none configured)
+  if (!weeklyRoutineData) {
+    const subjectsList = dbSubjects && dbSubjects.length > 0 ? dbSubjects : activeDetails.subjects;
+    const defaultWorkingDays = [
+      { key: "sun", nameBn: "রবিবার", enabled: true },
+      { key: "mon", nameBn: "সোমবার", enabled: true },
+      { key: "tue", nameBn: "মঙ্গলবার", enabled: true },
+      { key: "wed", nameBn: "বুধবার", enabled: true },
+      { key: "thu", nameBn: "বৃহস্পতিবার", enabled: true },
+    ];
+    const defaultPeriods = [
+      { id: "p1", period: "১ম পিরিয়ড", time: "০৮:০০ - ০৮:৫০" },
+      { id: "p2", period: "২য় পিরিয়ড", time: "০৮:৫০ - ০৯:৪০" },
+      { id: "p3", period: "৩য় পিরিয়ড", time: "০৯:৪০ - ১০:৩০" },
+      { id: "break", period: "বিরতি", time: "১০:৩০ - ১১:০০", isBreak: true },
+      { id: "p4", period: "৪র্থ পিরিয়ড", time: "১১:০০ - ১১:৫০" },
+      { id: "p5", period: "৫ম পিরিয়ড", time: "১১:৫০ - ১২:৪০" },
+    ];
+    const generatedEntries: Array<{
+      dayKey: string;
+      periodId: string;
+      subjectBn: string;
+      teacherName?: string;
+      roomNo?: string;
+    }> = [];
+
+    let sIdx = 0;
+    for (const d of defaultWorkingDays) {
+      for (const p of defaultPeriods) {
+        if (p.isBreak) continue;
+        const sub = subjectsList[sIdx % subjectsList.length];
+        sIdx++;
+        generatedEntries.push({
+          dayKey: d.key,
+          periodId: p.id,
+          subjectBn: sub?.nameBn || "সাধারণ বিষয়",
+          teacherName: "বিষয় শিক্ষক",
+          roomNo: `${100 + (activeClass?.level ?? 1)}`,
+        });
+      }
+    }
+
+    weeklyRoutineData = {
+      workingDays: defaultWorkingDays,
+      periods: defaultPeriods,
+      entries: generatedEntries,
+    };
+  }
 
   const handleDownloadRoutine = () => {
     window.print();
@@ -447,7 +521,7 @@ export default function AcademicClassExplorer({
         </h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-11 gap-2.5">
-          {classes.map((cls) => {
+          {displayClasses.map((cls) => {
             const isSelected = cls.level === selectedLevel;
             return (
               <button
@@ -859,7 +933,7 @@ export default function AcademicClassExplorer({
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 print:grid-cols-4">
-                {displayRoutine.map((slot, idx) => (
+                {activeDetails.routine.map((slot, idx) => (
                   <div
                     key={idx}
                     className="p-4 bg-gray-50 rounded-2xl border border-gray-200 hover:border-blue-300 transition-colors print:p-2.5 print:rounded-lg"
